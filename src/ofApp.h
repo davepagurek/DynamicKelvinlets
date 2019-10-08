@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "DisplacedMesh.h"
 
 constexpr unsigned int WINDOW_WIDTH = 1024;
 constexpr unsigned int WINDOW_HEIGHT = 768;
@@ -25,5 +26,5 @@ public:
   void gotMessage(ofMessage msg);
 
 private:
-  ofMesh mesh;
+  shared_ptr<DisplacedMesh> displacedMesh;
 };
