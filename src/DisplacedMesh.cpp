@@ -9,7 +9,7 @@ DisplacedMesh::DisplacedMesh(ofMesh mesh, Material material):
 
 void DisplacedMesh::update(float elapsedTime) {
   currentTime += elapsedTime;
-  
+
   // TODO remove kelvinlets with no influence
   
   mesh.getVertices() = originalPositions;
