@@ -5,6 +5,8 @@ constexpr unsigned int H = 20;
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+  ofMesh mesh;
+  
   auto coordToIndex = [=](unsigned int x, unsigned int y) { return y * W + x; };
 
   for (unsigned int x = 0; x < W; x++) {
@@ -18,10 +20,19 @@ void ofApp::setup() {
       }
     }
   }
+  
+  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(5, 0.45));
+  displacedMesh->addKelvinlet(Kelvinlet{
+    .force = {0, 2, 0},
+    .center = {W/2, H/2, 0},
+    .scale = 1
+  });
 }
 
 //--------------------------------------------------------------
-void ofApp::update() {}
+void ofApp::update() {
+  displacedMesh->update(ofGetLastFrameTime());
+}
 
 //--------------------------------------------------------------
 void ofApp::draw() {
@@ -32,7 +43,7 @@ void ofApp::draw() {
   ofPushMatrix();
   ofTranslate(WINDOW_WIDTH / 2 - scale * W / 2, WINDOW_HEIGHT / 2 - scale * H / 2);
   ofScale(scale);
-  mesh.drawWireframe();
+  displacedMesh->drawWireframe();
   ofPopMatrix();
 }
 
