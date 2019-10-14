@@ -7,29 +7,13 @@ constexpr unsigned int H = 20;
 void ofApp::setup() {
   ofSetFrameRate(30);
 
-  ofMesh mesh;
-
-  auto coordToIndex = [=](unsigned int x, unsigned int y) { return y * W + x; };
-
-  for (unsigned int x = 0; x < W; x++) {
-    for (unsigned int y = 0; y < H; y++) {
-      mesh.addVertex(glm::vec3(x, y, 0));
-      mesh.addColor(ofColor::black);
-
-      if (x < W - 1 && y < H - 1) {
-        mesh.addIndices({coordToIndex(x, y), coordToIndex(x + 1, y), coordToIndex(x + 1, y + 1)});
-        mesh.addIndices({coordToIndex(x + 1, y + 1), coordToIndex(x, y + 1), coordToIndex(x, y)});
-      }
-    }
-  }
-
-  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(5, 0.4));
+  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 14), Material(20, 0.4));
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
   if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet(Kelvinlet{.force = {0, 80, 0}, .center = {W / 2, H / 2, 0}, .scale = 1});
+    displacedMesh->addKelvinlet(Kelvinlet{.force = {0, 0, -200}, .center = {0, 0, 10}, .scale = 1});
   }
 
   displacedMesh->update(ofGetLastFrameTime());
@@ -38,14 +22,25 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
   ofClear(ofColor::white);
+  ofEnableDepthTest();
 
   constexpr float scale = 20;
 
-  ofPushMatrix();
-  ofTranslate(WINDOW_WIDTH / 2 - scale * W / 2, WINDOW_HEIGHT / 2 - scale * H / 2);
-  ofScale(scale);
-  displacedMesh->drawWireframe();
-  ofPopMatrix();
+  for (bool outline : {false, true}) {
+    ofPushMatrix();
+    // Push 1px closer to the camera when drawing the outline so it goes on top of the background
+    ofTranslate(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, outline ? 1 : 0);
+    ofRotateXDeg(-20);
+    ofRotateYDeg(20);
+    ofScale(scale);
+    ofSetColor(outline ? ofColor::black : ofColor::white);
+    if (outline) {
+      displacedMesh->drawWireframe();
+    } else {
+      displacedMesh->draw();
+    };
+    ofPopMatrix();
+  }
 }
 
 //--------------------------------------------------------------
