@@ -1,22 +1,26 @@
 #include "ofApp.h"
 
-constexpr unsigned int W = 20;
-constexpr unsigned int H = 20;
+constexpr int FRAME_RATE = 30;
+
+constexpr bool SAVE_SCREENSHOTS = false;
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-  ofSetFrameRate(30);
+  ofSetFrameRate(FRAME_RATE);
 
-  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 14), Material(20, 0.4));
+  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 28), Material(20, 0.4));
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
   if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet(Kelvinlet{.force = {0, 0, -200}, .center = {0, 0, 10}, .scale = 1});
+    displacedMesh->addKelvinlet(PushKelvinlet({0, 0, -200}, {0, 0, 10}, 1));
   }
 
-  displacedMesh->update(ofGetLastFrameTime());
+  displacedMesh->update(1.0f/FRAME_RATE);
+  if (SAVE_SCREENSHOTS) {
+    ofSaveScreen(ofToString(ofGetFrameNum())+".png");
+  }
 }
 
 //--------------------------------------------------------------

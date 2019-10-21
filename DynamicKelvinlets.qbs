@@ -12,15 +12,19 @@ Project{
         name: { return FileInfo.baseName(sourceDirectory) }
 
         files: [
-            'src/main.cpp',
-            'src/ofApp.cpp',
-            'src/ofApp.h',
-            'src/DisplacedMesh.cpp',
-            'src/DisplacedMesh.h',
-            'src/Kelvinlet.h',
-            'src/Kelvinlet.cpp',
-            'src/Material.cpp',
-            'src/Material.h'
+            "src/ImpulseKelvinlet.cpp",
+            "src/ImpulseKelvinlet.h",
+            "src/PushKelvinlet.cpp",
+            "src/PushKelvinlet.h",
+            "src/main.cpp",
+            "src/ofApp.cpp",
+            "src/ofApp.h",
+            "src/DisplacedMesh.cpp",
+            "src/DisplacedMesh.h",
+            "src/Kelvinlet.h",
+            "src/Kelvinlet.cpp",
+            "src/Material.cpp",
+            "src/Material.h",
         ]
 
         // This project is using addons.make to include the addons

@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		D37DD077234D00C700ADDA56 /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D37DD076234D00C700ADDA56 /* Material.cpp */; };
 		D37DD07A234D083A00ADDA56 /* DisplacedMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D37DD078234D083A00ADDA56 /* DisplacedMesh.cpp */; };
+		D3C50500235DFFD800D4DD90 /* ImpulseKelvinlet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3C504FC235DFFD800D4DD90 /* ImpulseKelvinlet.cpp */; };
+		D3C50501235DFFD800D4DD90 /* PushKelvinlet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3C504FD235DFFD800D4DD90 /* PushKelvinlet.cpp */; };
 		D3DCD534234BE079008382A1 /* Kelvinlet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3DCD532234BE079008382A1 /* Kelvinlet.cpp */; };
 		E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1D0A3A1BDC003C02F2 /* main.cpp */; };
 		E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */; };
@@ -31,6 +33,10 @@
 		D37DD076234D00C700ADDA56 /* Material.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Material.cpp; sourceTree = "<group>"; };
 		D37DD078234D083A00ADDA56 /* DisplacedMesh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DisplacedMesh.cpp; sourceTree = "<group>"; };
 		D37DD079234D083A00ADDA56 /* DisplacedMesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DisplacedMesh.h; sourceTree = "<group>"; };
+		D3C504FC235DFFD800D4DD90 /* ImpulseKelvinlet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImpulseKelvinlet.cpp; sourceTree = "<group>"; };
+		D3C504FD235DFFD800D4DD90 /* PushKelvinlet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PushKelvinlet.cpp; sourceTree = "<group>"; };
+		D3C504FE235DFFD800D4DD90 /* PushKelvinlet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PushKelvinlet.h; sourceTree = "<group>"; };
+		D3C504FF235DFFD800D4DD90 /* ImpulseKelvinlet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImpulseKelvinlet.h; sourceTree = "<group>"; };
 		D3DCD532234BE079008382A1 /* Kelvinlet.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Kelvinlet.cpp; sourceTree = "<group>"; };
 		D3DCD533234BE079008382A1 /* Kelvinlet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Kelvinlet.h; sourceTree = "<group>"; };
 		E42962AC2163EDD300A6A9E2 /* ofCamera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ofCamera.cpp; path = ../../../libs/openFrameworks/3d/ofCamera.cpp; sourceTree = SOURCE_ROOT; };
@@ -539,6 +545,10 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				D3C504FC235DFFD800D4DD90 /* ImpulseKelvinlet.cpp */,
+				D3C504FF235DFFD800D4DD90 /* ImpulseKelvinlet.h */,
+				D3C504FD235DFFD800D4DD90 /* PushKelvinlet.cpp */,
+				D3C504FE235DFFD800D4DD90 /* PushKelvinlet.h */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
@@ -652,7 +662,9 @@
 			files = (
 				D37DD077234D00C700ADDA56 /* Material.cpp in Sources */,
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
+				D3C50500235DFFD800D4DD90 /* ImpulseKelvinlet.cpp in Sources */,
 				D37DD07A234D083A00ADDA56 /* DisplacedMesh.cpp in Sources */,
+				D3C50501235DFFD800D4DD90 /* PushKelvinlet.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */,
 				D3DCD534234BE079008382A1 /* Kelvinlet.cpp in Sources */,
 			);
