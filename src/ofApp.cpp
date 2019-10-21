@@ -17,22 +17,23 @@ void ofApp::setup() {
       mesh.addColor(ofColor::black);
 
       if (x < W - 1 && y < H - 1) {
-        mesh.addIndices({coordToIndex(x, y), coordToIndex(x + 1, y), coordToIndex(x + 1, y + 1)});
-        mesh.addIndices({coordToIndex(x + 1, y + 1), coordToIndex(x, y + 1), coordToIndex(x, y)});
+        mesh.addIndices({coordToIndex(x, y), coordToIndex(x, y + 1), coordToIndex(x + 1, y)});
+        mesh.addIndices({coordToIndex(x + 1, y), coordToIndex(x + 1, y + 1), coordToIndex(x, y + 1)});
       }
     }
   }
 
-  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(5, 0.4));
+  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(1, 0.1));
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
   if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet(Kelvinlet{.force = {0, 80, 0}, .center = {W / 2, H / 2, 0}, .scale = 1});
+    displacedMesh->addKelvinlet( ImpulseKelvinlet{.force = {0, 50, 0}, .center = {W / 2, H / 2, 0}, .scale = 1});
   }
 
   displacedMesh->update(ofGetLastFrameTime());
+  ofSaveScreen(ofToString(ofGetFrameNum())+".png");
 }
 
 //--------------------------------------------------------------

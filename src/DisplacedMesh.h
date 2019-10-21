@@ -2,12 +2,14 @@
 
 #include "ofMain.h"
 #include "Kelvinlet.h"
+#include "ImpulseKelvinlet.h"
+#include "PushKelvinlet.h"
 
 class DisplacedMesh {
 public:
   DisplacedMesh(ofMesh mesh, Material material);
   void update(float elapsedTime);
-  void addKelvinlet(Kelvinlet kelvinlet);
+  void addKelvinlet(const ImpulseKelvinlet kelvinlet);
   void draw() const;
   void drawWireframe() const;
   
@@ -16,7 +18,7 @@ private:
   // of the force's application, we need to save the location of the mesh's vertices
   // at the time of force application.
   struct TimeShiftedKelvinlet {
-    Kelvinlet kelvinlet;
+    const ImpulseKelvinlet kelvinlet;
     float t0;
     vector<glm::vec3> initialLocations;
     
