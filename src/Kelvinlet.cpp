@@ -4,7 +4,7 @@
 
 glm::vec3 Kelvinlet::displacementRK4(glm::vec3 position, Material material, float t) const {
   glm::vec3 p = position;
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 8; i++) {
     glm::vec3 v0 = displacement(p, material, t);
     glm::vec3 v1 = displacement(p + 0.5 * v0, material, t);
     glm::vec3 v2 = displacement(p + 0.5 * v1, material, t);
