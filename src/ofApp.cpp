@@ -1,52 +1,50 @@
 #include "ofApp.h"
 
-constexpr unsigned int W = 20;
-constexpr unsigned int H = 20;
+constexpr int FRAME_RATE = 30;
+
+constexpr bool SAVE_SCREENSHOTS = false;
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-  ofSetFrameRate(30);
+  ofSetFrameRate(FRAME_RATE);
 
-  ofMesh mesh;
-
-  auto coordToIndex = [=](unsigned int x, unsigned int y) { return y * W + x; };
-
-  for (unsigned int x = 0; x < W; x++) {
-    for (unsigned int y = 0; y < H; y++) {
-      mesh.addVertex(glm::vec3(x, y, 0));
-      mesh.addColor(ofColor::black);
-
-      if (x < W - 1 && y < H - 1) {
-        mesh.addIndices({coordToIndex(x, y), coordToIndex(x, y + 1), coordToIndex(x + 1, y)});
-        mesh.addIndices({coordToIndex(x + 1, y), coordToIndex(x + 1, y + 1), coordToIndex(x, y + 1)});
-      }
-    }
-  }
-
-  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(1, 0.1));
+  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 28), Material(20, 0.4));
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
   if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet( ImpulseKelvinlet{.force = {0, 50, 0}, .center = {W / 2, H / 2, 0}, .scale = 1});
+    displacedMesh->addKelvinlet(PushKelvinlet({0, 0, -200}, {0, 0, 10}, 1));
   }
 
-  displacedMesh->update(ofGetLastFrameTime());
-  ofSaveScreen(ofToString(ofGetFrameNum())+".png");
+  displacedMesh->update(1.0f/FRAME_RATE);
+  if (SAVE_SCREENSHOTS) {
+    ofSaveScreen(ofToString(ofGetFrameNum())+".png");
+  }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
   ofClear(ofColor::white);
+  ofEnableDepthTest();
 
   constexpr float scale = 20;
 
-  ofPushMatrix();
-  ofTranslate(WINDOW_WIDTH / 2 - scale * W / 2, WINDOW_HEIGHT / 2 - scale * H / 2);
-  ofScale(scale);
-  displacedMesh->drawWireframe();
-  ofPopMatrix();
+  for (bool outline : {false, true}) {
+    ofPushMatrix();
+    // Push 1px closer to the camera when drawing the outline so it goes on top of the background
+    ofTranslate(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, outline ? 1 : 0);
+    ofRotateXDeg(-20);
+    ofRotateYDeg(20);
+    ofScale(scale);
+    ofSetColor(outline ? ofColor::black : ofColor::white);
+    if (outline) {
+      displacedMesh->drawWireframe();
+    } else {
+      displacedMesh->draw();
+    };
+    ofPopMatrix();
+  }
 }
 
 //--------------------------------------------------------------

@@ -23,14 +23,6 @@ void DisplacedMesh::update(float elapsedTime) {
   }
 }
 
-void DisplacedMesh::addKelvinlet(const ImpulseKelvinlet kelvinlet) {
-  kelvinlets.push_back(DisplacedMesh::TimeShiftedKelvinlet{
-    .kelvinlet=kelvinlet,
-    .t0=currentTime,
-    .initialLocations=mesh.getVertices()
-  });
-}
-
 void DisplacedMesh::draw() const {
   mesh.draw();
 }
@@ -43,7 +35,7 @@ vector<glm::vec3> DisplacedMesh::TimeShiftedKelvinlet::displacements(Material ma
   vector<glm::vec3> result;
   // Apply displacements to every point
   for (auto& point : initialLocations) {
-    result.push_back(kelvinlet.displacementRK4(point, material, t - t0));
+    result.push_back(kelvinlet->displacementRK4(point, material, t - t0));
   }
   
   return result;

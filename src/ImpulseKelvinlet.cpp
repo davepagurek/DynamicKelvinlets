@@ -24,15 +24,15 @@ glm::vec3 ImpulseKelvinlet::displacement(glm::vec3 position, Material material, 
     return -3.0f * pow(scale, 4) * (pow(reg_s, 2) - 5 * r * s) / pow(reg_s, 7);
   };
 
-  auto full_W = [&](double s) -> glm::vec3 {
+  auto full_W = [&](double s) -> glm::vec2 {
     double reg_s = reg(s);
-    return {W(s, reg_s), dr_W(s, reg_s), drr_W(s, reg_s)};
+    return {W(s, reg_s), dr_W(s, reg_s)};
   };
 
-  glm::vec3 W_alpha_plus = full_W(r + material.alpha * t);
-  glm::vec3 W_alpha_minus = full_W(r - material.alpha * t);
-  glm::vec3 W_beta_plus = full_W(r + material.beta * t);
-  glm::vec3 W_beta_minus = full_W(r - material.beta * t);
+  glm::vec2 W_alpha_plus = full_W(r + material.alpha * t);
+  glm::vec2 W_alpha_minus = full_W(r - material.alpha * t);
+  glm::vec2 W_beta_plus = full_W(r + material.beta * t);
+  glm::vec2 W_beta_minus = full_W(r - material.beta * t);
 
   auto U = [&](double gamma, double W_plus, double W_minus) -> double {
     return 1.0f / (16.0f * M_PI * gamma * r * r * r) * (W_plus - W_minus);
@@ -41,7 +41,7 @@ glm::vec3 ImpulseKelvinlet::displacement(glm::vec3 position, Material material, 
   double U_alpha = U(material.alpha, W_alpha_plus.x, W_alpha_minus.x);
   double U_beta = U(material.beta, W_beta_plus.x, W_beta_minus.x);
 
-  auto dr_U = [&](double gamma, glm::vec3 W_plus, glm::vec3 W_minus) -> double {
+  auto dr_U = [&](double gamma, glm::vec2 W_plus, glm::vec2 W_minus) -> double {
     return 1.0f / (16.0f * M_PI * gamma * r * r * r) * (W_plus.y - W_minus.y - 3.0f / r * (W_plus.x - W_minus.x));
   };
 
