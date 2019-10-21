@@ -9,7 +9,16 @@ class DisplacedMesh {
 public:
   DisplacedMesh(ofMesh mesh, Material material);
   void update(float elapsedTime);
-  void addKelvinlet(const ImpulseKelvinlet kelvinlet);
+  
+  template <typename KelvinletType>
+  void addKelvinlet(const KelvinletType kelvinlet) {
+    kelvinlets.push_back(DisplacedMesh::TimeShiftedKelvinlet{
+      .kelvinlet=make_shared<KelvinletType>(kelvinlet),
+      .t0=currentTime,
+      .initialLocations=mesh.getVertices()
+    });
+  }
+  
   void draw() const;
   void drawWireframe() const;
   
@@ -18,7 +27,7 @@ private:
   // of the force's application, we need to save the location of the mesh's vertices
   // at the time of force application.
   struct TimeShiftedKelvinlet {
-    const ImpulseKelvinlet kelvinlet;
+    const shared_ptr<Kelvinlet> kelvinlet;
     float t0;
     vector<glm::vec3> initialLocations;
     

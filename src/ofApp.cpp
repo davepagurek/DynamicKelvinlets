@@ -3,6 +3,8 @@
 constexpr unsigned int W = 20;
 constexpr unsigned int H = 20;
 
+constexpr bool SAVE_SCREENSHOTS = false;
+
 //--------------------------------------------------------------
 void ofApp::setup() {
   ofSetFrameRate(30);
@@ -29,11 +31,13 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
   if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet( ImpulseKelvinlet{.force = {0, 50, 0}, .center = {W / 2, H / 2, 0}, .scale = 1});
+    displacedMesh->addKelvinlet( ImpulseKelvinlet({0, 50, 0}, {W / 2, H / 2, 0}, 1));
   }
 
   displacedMesh->update(ofGetLastFrameTime());
-  ofSaveScreen(ofToString(ofGetFrameNum())+".png");
+  if (SAVE_SCREENSHOTS) {
+    ofSaveScreen(ofToString(ofGetFrameNum())+".png");
+  }
 }
 
 //--------------------------------------------------------------
