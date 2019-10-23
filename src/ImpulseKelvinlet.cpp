@@ -20,9 +20,6 @@ glm::vec3 ImpulseKelvinlet::displacement(glm::vec3 position, Material material, 
     return 1.0f / reg_s * (2 * s * s + scale * scale - 3 * r * s) + 1.0f / pow(reg_s, 3) * r * s * s * s;
   };
   auto dr_W = [&](float s, float reg_s) -> float { return -3.0f * pow(scale, 4) * r / pow(reg_s, 5); };
-  auto drr_W = [&](float s, float reg_s) -> float {
-    return -3.0f * pow(scale, 4) * (pow(reg_s, 2) - 5 * r * s) / pow(reg_s, 7);
-  };
 
   auto full_W = [&](float s) -> glm::vec2 {
     float reg_s = reg(s);
