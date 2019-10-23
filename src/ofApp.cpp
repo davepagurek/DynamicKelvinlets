@@ -7,8 +7,15 @@ constexpr bool SAVE_SCREENSHOTS = false;
 //--------------------------------------------------------------
 void ofApp::setup() {
   ofSetFrameRate(FRAME_RATE);
+  ofMesh mesh;
+  mesh.load("dragon_vrip_res4.ply");
+  for (auto& vertex : mesh.getVertices()) {
+    vertex = vertex * 100;
+    vertex.y *= -1;
+    vertex.y += 10;
+  }
 
-  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 28), Material(20, 0.45));
+  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(20, 0.45));
 }
 
 //--------------------------------------------------------------
