@@ -8,6 +8,7 @@
 class DisplacedMesh {
 public:
   DisplacedMesh(ofMesh mesh, Material material);
+  void setup();
   void update(float elapsedTime);
   
   template <typename KelvinletType>
@@ -33,6 +34,10 @@ private:
     
     const vector<glm::vec3>& displacements(Material material, float t) const;
   };
+  
+  ofShader shader;
+  void shaderStart() const;
+  void shaderEnd() const;
   
   ofMesh mesh;
   Material material;

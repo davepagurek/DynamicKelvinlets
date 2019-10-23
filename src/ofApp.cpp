@@ -16,14 +16,15 @@ void ofApp::setup() {
   }
 
   displacedMesh = make_shared<DisplacedMesh>(mesh, Material(20, 0.45));
+  displacedMesh->setup();
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
+//  if (ofGetFrameNum() == 15) {
+//    displacedMesh->addKelvinlet(PushKelvinlet({400, 0, 0}, {-10, 0, 0}, 1));
+//  }
   if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet(PushKelvinlet({400, 0, 0}, {-10, 0, 0}, 1));
-  }
-  if (ofGetFrameNum() == 60) {
     displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -200}, {0, 0, 10}, 1));
   }
 
