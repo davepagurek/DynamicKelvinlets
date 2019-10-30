@@ -10,12 +10,18 @@ void ofApp::setup() {
   ofMesh mesh;
   mesh.load("dragon_vrip_res4.ply");
   for (auto& vertex : mesh.getVertices()) {
-    vertex = vertex * 100;
+    vertex = vertex * 15;
     vertex.y *= -1;
-    vertex.y += 10;
+    vertex.y += 1.5;
   }
+  
+  auto closest = std::min_element(mesh.getVertices().begin(), mesh.getVertices().end(), [](glm::vec3 a, glm::vec3 b) {
+    return glm::length(a - glm::vec3(0, 0, 0.5)) < glm::length(b - glm::vec3(0, 0, 0.5));
+  });
+  std::cout << closest->x << ", " << closest->y << ", " << closest->z << std::endl;
 
-  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(20, 0.45));
+  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(20, 0.1));
+//  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 28), Material(20, 0.1));
   displacedMesh->setup();
 }
 
@@ -25,7 +31,7 @@ void ofApp::update() {
 //    displacedMesh->addKelvinlet(PushKelvinlet({400, 0, 0}, {-10, 0, 0}, 1));
 //  }
   if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -200}, {0, 0, 10}, 1));
+    displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -15}, {0, 0, 0.5}, 1));
   }
 
   displacedMesh->update(1.0f / FRAME_RATE);
@@ -39,7 +45,8 @@ void ofApp::draw() {
   ofClear(ofColor::white);
   ofEnableDepthTest();
 
-  constexpr float scale = 20;
+  constexpr float scale = 170;
+//  constexpr float scale = 20;
 
   for (bool outline : {false, true}) {
     ofPushMatrix();

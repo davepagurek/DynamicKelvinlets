@@ -46,7 +46,7 @@ vec3 displacement(int i, vec3 p) {
   vec3 force = kelvinletForces[i];
   float scale = kelvinletScales[i];
   
-  if (r < 1e-4) {
+  if (r < 0.01) {
     return 5.0 * t * pow(scale, 4) / (8.0 * M_PI) *
       (1.0 / pow(reg(alpha * t, scale), 7) + 2.0 / pow(reg(beta * t, scale), 7)) * force;
   }
@@ -70,14 +70,15 @@ vec3 displacement(int i, vec3 p) {
 
 vec3 displacementRK4(int i) {
   vec3 p = position.xyz;
+  int steps = 4;
   
-  for (int n = 0; n < 4; n++) {
+  for (int n = 0; n < steps; n++) {
     vec3 v0 = displacement(i, p);
     vec3 v1 = displacement(i, p + 0.5 * v0);
     vec3 v2 = displacement(i, p + 0.5 * v1);
     vec3 v3 = displacement(i, p + v2);
   
-    p += (v0 + v1 * 2 + v2 * 2 + v3) / 6;
+    p += (v0 + v1 * 2 + v2 * 2 + v3) / (6 * steps);
   }
   
   return p - position.xyz;
