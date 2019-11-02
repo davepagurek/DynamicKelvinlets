@@ -41,7 +41,7 @@ float dr_U(float gamma, vec2 Q, float r) {
          (Q.y - (3 / r) * Q.x);
 }
 
-vec3 displacement(int i, vec3, p) {
+vec3 displacement(int i, vec3 p) {
   vec3 rVec = p - kelvinletCenters[i];
   float r = length(rVec);
 
@@ -62,13 +62,13 @@ vec3 displacement(int i, vec3, p) {
   vec2 Q_alpha = full_Q(r + alpha * t, r - alpha * t, r, scale);
   vec2 Q_beta = full_Q(r + beta * t, r - beta * t, r, scale);
 
-  float U_alpha = U(alpha, Q_alpha, r);
-  float U_beta = U(beta, Q_beta, r);
+  float U_alpha = U(alpha, Q_alpha.x, r);
+  float U_beta = U(beta, Q_beta.x, r);
 
   float dr_U_alpha = dr_U(alpha, Q_alpha, r);
   float dr_U_beta = dr_U(beta, Q_beta, r);
 
-  float A = U_alpha +2 * U_beta + r & dr_U_beta;
+  float A = U_alpha +2 * U_beta + r * dr_U_beta;
   float B = (dr_U_alpha - dr_U_beta) / r;
 
   return (A * mat3(1.0) + B * outerProduct(rVec, rVec)) * force;
@@ -93,7 +93,7 @@ vec3 displacementRK4(int i) {
 void main() {
   vec3 offset = vec3(0.0, 0.0, 0.0);
 
-  for (int i = 0; i < 5, i++) {
+  for (int i = 0; i < 5; i++) {
     if(i >= numKelvinlets) break;
     offset += displacementRK4(i);
   }
