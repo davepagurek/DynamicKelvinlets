@@ -6,7 +6,7 @@ glm::vec3 PushKelvinlet::displacement(glm::vec3 position, Material material, flo
     return {0, 0, 0};
 
   glm::vec3 rVec = (position - center);
-  double r = glm::length(rVec);
+  float r = glm::length(rVec);
 
   // save powers of scale
   double scale_2 = scale * scale;
@@ -42,7 +42,7 @@ glm::vec3 PushKelvinlet::displacement(glm::vec3 position, Material material, flo
            (scale_2) * r * (s / pow(reg(s), 3) + w / (pow(reg(w), 3)));
   };
 
-  auto drr_Q = [&](double s, double w) {
+  auto drr_Q = [&](float s, float w) {
     return 2.0f * (2.0f * r / reg(r) - s / reg(s) - w / reg(w)) +
            (scale_2) * (2.0f * r / pow(reg(r), 3) - s / pow(reg(s), 3) -
                               w / pow(reg(w), 3)) +
@@ -51,21 +51,21 @@ glm::vec3 PushKelvinlet::displacement(glm::vec3 position, Material material, flo
                 1.0f / pow(reg(w), 5));
   };
 
-  auto full_Q = [&](double s, double w) -> glm::vec3 {
+  auto full_Q = [&](float s, float w) -> glm::vec3 {
     return {Q(s, w), dr_Q(s, w), drr_Q(s, w)};
   };
 
   glm::vec3 Q_alpha = full_Q(r + material.alpha * t, r - material.alpha * t);
   glm::vec3 Q_beta = full_Q(r + material.beta * t , r - material.beta * t);
 
-  auto U = [&](double gamma, double Q) -> double {
+  auto U = [&](float gamma, float Q) -> float {
     return (1.0f / (16.0f * M_PI * gamma * gamma * pow(r, 3))) * Q;
   };
 
-  double U_alpha = U(material.alpha, Q_alpha.x);
-  double U_beta = U(material.beta, Q_beta.x);
+  float U_alpha = U(material.alpha, Q_alpha.x);
+  float U_beta = U(material.beta, Q_beta.x);
 
-  auto dr_U = [&](double gamma, glm::vec3 Q) {
+  auto dr_U = [&](float gamma, glm::vec3 Q) {
     return 1.0f / (16.0f * M_PI * gamma * gamma * pow(r, 3)) *
            (Q.y - (3 / r) * Q.x);
   };
@@ -73,8 +73,8 @@ glm::vec3 PushKelvinlet::displacement(glm::vec3 position, Material material, flo
   auto dr_U_alpha = dr_U(material.alpha, Q_alpha);
   auto dr_U_beta = dr_U(material.beta, Q_beta);
 
-  double A = U_alpha + 2 * U_beta + r * dr_U_beta;
-  double B = (dr_U_alpha - dr_U_beta) / r;
+  float A = U_alpha + 2 * U_beta + r * dr_U_beta;
+  float B = (dr_U_alpha - dr_U_beta) / r;
 
 
   return (A * glm::mat3() + B * glm::outerProduct(rVec, rVec)) * force;

@@ -13,7 +13,7 @@ xcuserdata
 
 # Build products
 build/
-bin/*
+bin/DynamicKelvinlets*
 *.o
 *.LinkFileList
 *.hmap

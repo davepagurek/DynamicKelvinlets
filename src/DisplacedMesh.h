@@ -31,7 +31,7 @@ private:
     float t0;
     vector<glm::vec3> initialLocations;
     
-    vector<glm::vec3> displacements(Material material, float t) const;
+    const vector<glm::vec3>& displacements(Material material, float t) const;
   };
   
   ofMesh mesh;
