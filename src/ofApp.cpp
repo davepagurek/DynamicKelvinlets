@@ -31,7 +31,7 @@ void ofApp::update() {
 //    displacedMesh->addKelvinlet(PushKelvinlet({400, 0, 0}, {-10, 0, 0}, 1));
 //  }
   if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -15}, {0, 0, 0.5}, 1));
+    displacedMesh->addKelvinlet(PushKelvinlet({0, 0, -15}, {0, 0, 0.5}, 1));
   }
 
   displacedMesh->update(1.0f / FRAME_RATE);

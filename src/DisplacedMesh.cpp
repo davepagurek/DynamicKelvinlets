@@ -8,16 +8,16 @@ DisplacedMesh::DisplacedMesh(ofMesh mesh, Material material):
 {}
 
 void DisplacedMesh::setup() {
-  shader.load("shaders/displacement");
+  shader.load("shaders/displacement-push");
 }
 
 void DisplacedMesh::update(float elapsedTime) {
   currentTime += elapsedTime;
 
   // TODO remove kelvinlets with no influence
-  
+
   /*mesh.getVertices() = originalPositions;
-  
+
   // Take the superposition of offsets from all applied Kelvinlets
   for (auto& kelvinlet_ts: kelvinlets) {
     const vector<glm::vec3>& offsets = kelvinlet_ts.displacements(material, currentTime);
@@ -29,7 +29,7 @@ void DisplacedMesh::update(float elapsedTime) {
 
 void DisplacedMesh::shaderStart() const {
   shader.begin();
-  
+
   shader.setUniform1f("alpha", material.alpha);
   shader.setUniform1f("beta", material.beta);
   shader.setUniform1i("numKelvinlets", kelvinlets.size());
@@ -60,11 +60,11 @@ void DisplacedMesh::drawWireframe() const {
 const vector<glm::vec3>& DisplacedMesh::TimeShiftedKelvinlet::displacements(Material material, float t) const {
   static vector<glm::vec3> result;
   result.clear();
-  
+
   // Apply displacements to every point
   for (auto& point : initialLocations) {
     result.push_back(kelvinlet->displacementRK4(point, material, t - t0));
   }
-  
+
   return result;
 }
