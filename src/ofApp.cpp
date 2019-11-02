@@ -20,7 +20,7 @@ void ofApp::setup() {
   });
   std::cout << closest->x << ", " << closest->y << ", " << closest->z << std::endl;
 
-  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(20, 0.1));
+  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(15, 0.4));
 //  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 28), Material(20, 0.1));
   displacedMesh->setup();
 }
@@ -30,7 +30,7 @@ void ofApp::update() {
 //  if (ofGetFrameNum() == 15) {
 //    displacedMesh->addKelvinlet(PushKelvinlet({400, 0, 0}, {-10, 0, 0}, 1));
 //  }
-  if (ofGetFrameNum() == 15) {
+  if (ofGetFrameNum() == 30+15) {
     displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -15}, {0, 0, 0.5}, 1));
   }
 
@@ -53,7 +53,7 @@ void ofApp::draw() {
     // Push 1px closer to the camera when drawing the outline so it goes on top of the background
     ofTranslate(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, outline ? 1 : 0);
     ofRotateXDeg(-20);
-    ofRotateYDeg(20);
+    ofRotateYDeg(10);
     ofScale(scale);
     ofSetColor(outline ? ofColor::black : ofColor::white);
     if (outline) {
