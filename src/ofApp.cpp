@@ -14,11 +14,6 @@ void ofApp::setup() {
     vertex.y *= -1;
     vertex.y += 1.5;
   }
-  
-  auto closest = std::min_element(mesh.getVertices().begin(), mesh.getVertices().end(), [](glm::vec3 a, glm::vec3 b) {
-    return glm::length(a - glm::vec3(0, 0, 0.5)) < glm::length(b - glm::vec3(0, 0, 0.5));
-  });
-  std::cout << closest->x << ", " << closest->y << ", " << closest->z << std::endl;
 
   displacedMesh = make_shared<DisplacedMesh>(mesh, Material(15, 0.4));
 //  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 28), Material(20, 0.1));

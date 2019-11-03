@@ -1,5 +1,7 @@
 #include "DisplacedMesh.h"
 
+constexpr bool USE_SHADER = true;
+
 string slurp(string path) {
   return ofFile(path).readToBuffer().getText();
 }
@@ -31,15 +33,17 @@ void DisplacedMesh::update(float elapsedTime) {
 
   // TODO remove kelvinlets with no influence
 
-  /*mesh.getVertices() = originalPositions;
+  if (!USE_SHADER) {
+    mesh.getVertices() = originalPositions;
 
-  // Take the superposition of offsets from all applied Kelvinlets
-  for (auto& kelvinlet_ts: kelvinlets) {
-    const vector<glm::vec3>& offsets = kelvinlet_ts.displacements(material, currentTime);
-    for (size_t i = 0; i < mesh.getNumVertices(); i++) {
-      mesh.setVertex(i, mesh.getVertex(i) + offsets[i]);
+    // Take the superposition of offsets from all applied Kelvinlets
+    for (auto& kelvinlet_ts: kelvinlets) {
+      const vector<glm::vec3>& offsets = kelvinlet_ts.displacements(material, currentTime);
+      for (size_t i = 0; i < mesh.getNumVertices(); i++) {
+        mesh.setVertex(i, mesh.getVertex(i) + offsets[i]);
+      }
     }
-  }*/
+  }
 }
 
 void DisplacedMesh::shaderStart() const {
@@ -81,15 +85,16 @@ void DisplacedMesh::shaderEnd() const {
 }
 
 void DisplacedMesh::draw() const {
-  shaderStart();
+  if (USE_SHADER) shaderStart();
   mesh.draw();
-  shaderEnd();
+  if (USE_SHADER) shaderEnd();
+//  cout << ofGetFrameRate() << endl;
 }
 
 void DisplacedMesh::drawWireframe() const {
-  shaderStart();
+  if (USE_SHADER) shaderStart();
   mesh.drawWireframe();
-  shaderEnd();
+  if (USE_SHADER) shaderEnd();
 }
 
 const vector<glm::vec3>& DisplacedMesh::TimeShiftedKelvinlet::displacements(Material material, float t) const {
