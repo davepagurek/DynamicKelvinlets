@@ -1,5 +1,9 @@
 #include "DisplacedMesh.h"
 
+string slurp(string path) {
+  return ofFile(path).readToBuffer().getText();
+}
+
 DisplacedMesh::DisplacedMesh(ofMesh mesh, Material material):
   mesh(mesh),
   material(material),
@@ -8,7 +12,18 @@ DisplacedMesh::DisplacedMesh(ofMesh mesh, Material material):
 {}
 
 void DisplacedMesh::setup() {
-  shader.load("shaders/displacement-push");
+  ofShaderSettings settings;
+  
+  string vertexShaderSource =
+    slurp("shaders/header.vert") +
+    slurp("shaders/displacement-impulse.vert") +
+    slurp("shaders/displacement-push.vert") +
+    slurp("shaders/footer.vert");
+  string fragmentShaderSource = slurp("shaders/displacement.frag");
+  
+  settings.shaderSources[GL_VERTEX_SHADER] = vertexShaderSource;
+  settings.shaderSources[GL_FRAGMENT_SHADER] = fragmentShaderSource;
+  shader.setup(settings);
 }
 
 void DisplacedMesh::update(float elapsedTime) {
@@ -33,12 +48,32 @@ void DisplacedMesh::shaderStart() const {
   shader.setUniform1f("alpha", material.alpha);
   shader.setUniform1f("beta", material.beta);
   shader.setUniform1i("numKelvinlets", kelvinlets.size());
-  for (int i = 0; i < kelvinlets.size(); i++) {
-    shader.setUniform3fv((string("kelvinletCenters[") + to_string(i) + "]").c_str(), glm::value_ptr(kelvinlets[i].kelvinlet->center));
-    shader.setUniform3fv((string("kelvinletForces[") + to_string(i) + "]").c_str(), glm::value_ptr(kelvinlets[i].kelvinlet->force));
-    shader.setUniform1f((string("kelvinletTimes[") + to_string(i) + "]").c_str(), currentTime - kelvinlets[i].t0);
-    shader.setUniform1f((string("kelvinletScales[") + to_string(i) + "]").c_str(), kelvinlets[i].kelvinlet->scale);
+  
+  static vector<int> types;
+  static vector<float> centers;
+  static vector<float> forces;
+  static vector<float> times;
+  static vector<float> scales;
+  
+  types.clear();
+  centers.clear();
+  forces.clear();
+  times.clear();
+  scales.clear();
+  
+  for (auto& k : kelvinlets) {
+    types.push_back(k.kelvinlet->type());
+    for (size_t i : {0, 1, 2}) centers.push_back(k.kelvinlet->center[i]);
+    for (size_t i : {0, 1, 2}) forces.push_back(k.kelvinlet->force[i]);
+    times.push_back(currentTime - k.t0);
+    scales.push_back(k.kelvinlet->scale);
   }
+  
+  shader.setUniform1iv("kelvinletTypes", types.data(), kelvinlets.size());
+  shader.setUniform3fv("kelvinletCenters", centers.data(), kelvinlets.size());
+  shader.setUniform3fv("kelvinletForces", forces.data(), kelvinlets.size());
+  shader.setUniform1fv("kelvinletTimes", times.data(), kelvinlets.size());
+  shader.setUniform1fv("kelvinletScales", scales.data(), kelvinlets.size());
 }
 
 void DisplacedMesh::shaderEnd() const {
