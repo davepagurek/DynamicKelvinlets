@@ -33,6 +33,7 @@
 		D37DD076234D00C700ADDA56 /* Material.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Material.cpp; sourceTree = "<group>"; };
 		D37DD078234D083A00ADDA56 /* DisplacedMesh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DisplacedMesh.cpp; sourceTree = "<group>"; };
 		D37DD079234D083A00ADDA56 /* DisplacedMesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DisplacedMesh.h; sourceTree = "<group>"; };
+		D3B83A50235F6FF900F218E0 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = bin/data/shaders; sourceTree = SOURCE_ROOT; };
 		D3C504FC235DFFD800D4DD90 /* ImpulseKelvinlet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImpulseKelvinlet.cpp; sourceTree = "<group>"; };
 		D3C504FD235DFFD800D4DD90 /* PushKelvinlet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PushKelvinlet.cpp; sourceTree = "<group>"; };
 		D3C504FE235DFFD800D4DD90 /* PushKelvinlet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PushKelvinlet.h; sourceTree = "<group>"; };
@@ -545,6 +546,7 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				D3B83A50235F6FF900F218E0 /* shaders */,
 				D3C504FC235DFFD800D4DD90 /* ImpulseKelvinlet.cpp */,
 				D3C504FF235DFFD800D4DD90 /* ImpulseKelvinlet.h */,
 				D3C504FD235DFFD800D4DD90 /* PushKelvinlet.cpp */,

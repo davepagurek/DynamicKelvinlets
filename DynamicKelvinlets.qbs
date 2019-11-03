@@ -12,6 +12,8 @@ Project{
         name: { return FileInfo.baseName(sourceDirectory) }
 
         files: [
+            "bin/data/shaders/displacement-push.frag",
+            "bin/data/shaders/displacement-push.vert",
             "src/ImpulseKelvinlet.cpp",
             "src/ImpulseKelvinlet.h",
             "src/PushKelvinlet.cpp",
@@ -25,6 +27,10 @@ Project{
             "src/Kelvinlet.cpp",
             "src/Material.cpp",
             "src/Material.h",
+            "bin/data/shaders/displacement.frag",
+            "bin/data/shaders/displacement.vert",
+            "bin/data/shaders/displacement-push.vert",
+            "bin/data/shaders/displacement-push.frag",
         ]
 
         // This project is using addons.make to include the addons
