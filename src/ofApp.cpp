@@ -10,21 +10,23 @@ void ofApp::setup() {
   ofMesh mesh;
   mesh.load("dragon_vrip_res4.ply");
   for (auto& vertex : mesh.getVertices()) {
-    vertex = vertex * 100;
+    vertex = vertex * 15;
     vertex.y *= -1;
-    vertex.y += 10;
+    vertex.y += 1.5;
   }
 
-  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(20, 0.45));
+  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(15, 0.4));
+//  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 28), Material(20, 0.1));
+  displacedMesh->setup();
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
   if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet(PushKelvinlet({400, 0, 0}, {-10, 0, 0}, 1));
+    displacedMesh->addKelvinlet(PushKelvinlet({15, 0, 0}, {-0.5, 0, 0}, 1));
   }
-  if (ofGetFrameNum() == 60) {
-    displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -200}, {0, 0, 10}, 1));
+  if (ofGetFrameNum() == 30+15) {
+    displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -15}, {0, 0, 0.5}, 1));
   }
 
   displacedMesh->update(1.0f / FRAME_RATE);
@@ -38,14 +40,15 @@ void ofApp::draw() {
   ofClear(ofColor::white);
   ofEnableDepthTest();
 
-  constexpr float scale = 20;
+  constexpr float scale = 170;
+//  constexpr float scale = 20;
 
   for (bool outline : {false, true}) {
     ofPushMatrix();
     // Push 1px closer to the camera when drawing the outline so it goes on top of the background
     ofTranslate(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, outline ? 1 : 0);
     ofRotateXDeg(-20);
-    ofRotateYDeg(20);
+    ofRotateYDeg(10);
     ofScale(scale);
     ofSetColor(outline ? ofColor::black : ofColor::white);
     if (outline) {
