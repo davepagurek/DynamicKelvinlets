@@ -4,7 +4,7 @@ Implementation of the paper [Dynamic Kelvinlets](https://graphics.pixar.com/libr
 
 Prerequisite:
 
-OpenFrameWorks - We use OpenFrameworks wrapper for OpenGL. You can download it from[their website] (https://openframeworks.cc/download/)
+OpenFrameWorks - We use OpenFrameworks wrapper for OpenGL. You can download it from [their website](https://openframeworks.cc/download/)
 
 To install, run `make` from the base directory of the package.
 
