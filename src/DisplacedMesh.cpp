@@ -97,13 +97,17 @@ void DisplacedMesh::drawWireframe() const {
   if (USE_SHADER) shaderEnd();
 }
 
+glm::vec3 DisplacedMesh::TimeShiftedKelvinlet::displacement(Material material, float t, const glm::vec3& position) const {
+  return kelvinlet->displacementRK4(position, material, t - t0);
+}
+
 const vector<glm::vec3>& DisplacedMesh::TimeShiftedKelvinlet::displacements(Material material, float t) const {
   static vector<glm::vec3> result;
   result.clear();
 
   // Apply displacements to every point
   for (auto& point : initialLocations) {
-    result.push_back(kelvinlet->displacementRK4(point, material, t - t0));
+    result.push_back(displacement(material, t, point));
   }
 
   return result;

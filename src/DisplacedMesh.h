@@ -12,7 +12,13 @@ public:
   void update(float elapsedTime);
   
   template <typename KelvinletType>
-  void addKelvinlet(const KelvinletType kelvinlet) {
+  void addKelvinlet(KelvinletType kelvinlet) {
+    glm::vec3 offset;
+    for (auto& k : kelvinlets) {
+      offset += k.displacement(material, currentTime, kelvinlet.center);
+    }
+    // Invert current transform to bring force center into material space
+    kelvinlet.center -= offset;
     kelvinlets.push_back(DisplacedMesh::TimeShiftedKelvinlet{
       .kelvinlet=make_shared<KelvinletType>(kelvinlet),
       .t0=currentTime,
@@ -32,6 +38,7 @@ private:
     float t0;
     vector<glm::vec3> initialLocations;
     
+    glm::vec3 displacement(Material material, float t, const glm::vec3& position) const;
     const vector<glm::vec3>& displacements(Material material, float t) const;
   };
   
