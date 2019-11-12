@@ -1,9 +1,10 @@
 #include "Mesh.h"
+#include "KelvinletGenerator.h"
 #include "ofxAssimpModelLoader.h"
 
 class AnimatedMesh: public Mesh {
 public:
-  AnimatedMesh(const ofxAssimpModelLoader& mesh, const function<void(const vector<glm::vec3>&, const vector<glm::vec3>&)>& callback);
+  AnimatedMesh(const ofxAssimpModelLoader& mesh, const KelvinletGenerator& callback);
   virtual void update(float t) override;
   virtual void draw() override;
   virtual void drawWireframe() override;
@@ -20,7 +21,7 @@ private:
   TransformFreeScene original;
   
   ofMesh mesh;
-  function<void(const vector<glm::vec3>&, const vector<glm::vec3>&)> callback;
+  KelvinletGenerator callback;
   array<vector<glm::vec3>, 3> vertices;
   array<float, 3> times;
   int currentIndex = -1;

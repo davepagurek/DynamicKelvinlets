@@ -1,7 +1,7 @@
 #include "AnimatedMesh.h"
 #include "constants.h"
 
-AnimatedMesh::AnimatedMesh(const ofxAssimpModelLoader& loaderMesh, const function<void(const vector<glm::vec3>&, const vector<glm::vec3>&)>& callback):
+AnimatedMesh::AnimatedMesh(const ofxAssimpModelLoader& loaderMesh, const KelvinletGenerator& callback):
 original(loaderMesh),
 callback(callback)
 {

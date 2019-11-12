@@ -31,13 +31,12 @@ void DisplacedMesh::update(float elapsedTime) {
 
   // Remove old Kelvinlets
   for (auto it = kelvinlets.begin(); it != kelvinlets.end();) {
-    if (currentTime - it->t0 > 2 && it->kelvinlet->type() == 0) {
+    if (currentTime - it->t0 > MAX_KELVINLET_LIFE && it->kelvinlet->type() == 0) {
       it = kelvinlets.erase(it);
     } else {
       ++it;
     }
   }
-  cout << kelvinlets.size() << endl;
 
   if (!USE_SHADER) {
     mesh->getVertices() = mesh->getOriginalVertices();
@@ -80,6 +79,10 @@ void DisplacedMesh::shaderStart() const {
     
     ++i;
     if (i >= MAX_KELVINLETS) break;
+  }
+  
+  if (kelvinlets.size() > MAX_KELVINLETS) {
+    cout << "More Kelvinlets (" << kelvinlets.size() << ") than MAX_KELVINLETS (" << MAX_KELVINLETS << "), omitting some" << endl;
   }
   
   shader.setUniform1iv("kelvinletTypes", types.data(), kelvinlets.size());

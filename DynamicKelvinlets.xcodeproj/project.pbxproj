@@ -13,6 +13,7 @@
 		94DB0D572900D4A7FBC91B4A /* ImpulseKelvinlet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 71E97097A1B27025B5CED38D /* ImpulseKelvinlet.cpp */; };
 		A45326A57E9229CE9A63A959 /* PushKelvinlet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1131652AA8FE27683871AA9D /* PushKelvinlet.cpp */; };
 		B8846EF8E504895A4A9EFEC0 /* ofxAssimpTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B6F2EE44AD04FF549AB13699 /* ofxAssimpTexture.cpp */; };
+		D36A375B237B57D000798CB7 /* KelvinletGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D36A3759237B57D000798CB7 /* KelvinletGenerator.cpp */; };
 		D3A299DF237B430800F777C8 /* StaticMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A299DD237B430800F777C8 /* StaticMesh.cpp */; };
 		D3A299E2237B435600F777C8 /* AnimatedMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A299E0237B435600F777C8 /* AnimatedMesh.cpp */; };
 		D4109EBB9ECF3D1E5EBD2BB3 /* Kelvinlet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFC7DE22418FA5009C3C1BF1 /* Kelvinlet.cpp */; };
@@ -84,6 +85,8 @@
 		CA9637455E8EF1837290DE41 /* DisplacedMesh.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = DisplacedMesh.h; path = src/DisplacedMesh.h; sourceTree = SOURCE_ROOT; };
 		CAFE4416C77C0E19B0D25FC5 /* PushKelvinlet.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = PushKelvinlet.h; path = src/PushKelvinlet.h; sourceTree = SOURCE_ROOT; };
 		D1B370068072AAB890CD42D2 /* pstdint.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = pstdint.h; path = ../../../addons/ofxAssimpModelLoader/libs/assimp/include/assimp/Compiler/pstdint.h; sourceTree = SOURCE_ROOT; };
+		D36A3759237B57D000798CB7 /* KelvinletGenerator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = KelvinletGenerator.cpp; sourceTree = "<group>"; };
+		D36A375A237B57D000798CB7 /* KelvinletGenerator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KelvinletGenerator.h; sourceTree = "<group>"; };
 		D39728D32374B14900FAE014 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = bin/data/shaders; sourceTree = SOURCE_ROOT; };
 		D3A299DC237B42D700F777C8 /* Mesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Mesh.h; sourceTree = "<group>"; };
 		D3A299DD237B430800F777C8 /* StaticMesh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StaticMesh.cpp; sourceTree = "<group>"; };
@@ -742,6 +745,8 @@
 				D3A299DE237B430800F777C8 /* StaticMesh.h */,
 				D3A299E0237B435600F777C8 /* AnimatedMesh.cpp */,
 				D3A299E1237B435600F777C8 /* AnimatedMesh.h */,
+				D36A3759237B57D000798CB7 /* KelvinletGenerator.cpp */,
+				D36A375A237B57D000798CB7 /* KelvinletGenerator.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -862,6 +867,7 @@
 				A45326A57E9229CE9A63A959 /* PushKelvinlet.cpp in Sources */,
 				3B8120368B4FCCD80883BAF3 /* ofxAssimpAnimation.cpp in Sources */,
 				483FA4F6D5FA6422C559B1F5 /* ofxAssimpMeshHelper.cpp in Sources */,
+				D36A375B237B57D000798CB7 /* KelvinletGenerator.cpp in Sources */,
 				8DED5056525646FA71980866 /* ofxAssimpModelLoader.cpp in Sources */,
 				D3A299E2237B435600F777C8 /* AnimatedMesh.cpp in Sources */,
 				B8846EF8E504895A4A9EFEC0 /* ofxAssimpTexture.cpp in Sources */,
