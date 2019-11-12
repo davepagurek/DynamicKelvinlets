@@ -1,7 +1,5 @@
 #include "DisplacedMesh.h"
-
-constexpr bool USE_SHADER = true;
-constexpr int MAX_KELVINLETS = 40;
+#include "constants.h"
 
 string slurp(string path) {
   return ofFile(path).readToBuffer().getText();
@@ -133,85 +131,4 @@ const vector<glm::vec3>& DisplacedMesh::TimeShiftedKelvinlet::displacements(Mate
   }
 
   return result;
-}
-
-
-DisplacedMesh::StaticMesh::StaticMesh(const ofMesh& mesh): original(mesh), mesh(mesh) {}
-void DisplacedMesh::StaticMesh::update(float t) {}
-void DisplacedMesh::StaticMesh::draw() {
-  mesh.draw();
-}
-void DisplacedMesh::StaticMesh::drawWireframe() {
-  mesh.drawWireframe();
-}
-vector<glm::vec3>& DisplacedMesh::StaticMesh::getVertices() {
-  return mesh.getVertices();
-}
-vector<glm::vec3> DisplacedMesh::StaticMesh::getOriginalVertices() {
-  return original.getVertices();
-}
-
-DisplacedMesh::AnimatedMesh::AnimatedMesh(const ofxAssimpModelLoader& loaderMesh, const function<void(const vector<glm::vec3>&, const vector<glm::vec3>&)>& callback):
-  original(loaderMesh),
-  callback(callback)
-{
-  mesh.addVertices(original.getCurrentAnimatedMesh(0).getVertices());
-  mesh.addIndices(original.getCurrentAnimatedMesh(0).getIndices());
-}
-void DisplacedMesh::AnimatedMesh::update(float t) {
-  original.update();
-  if (currentIndex == -1) {
-    for (int i = vertices.size()-1; i > 0; --i) {
-      times[i] = t - (vertices.size() - i) * 0.01;
-      vertices[i] = getOriginalVertices();
-    }
-  }
-  currentIndex = (currentIndex + 1) % vertices.size();
-  times[currentIndex] = t;
-  vertices[currentIndex] = getOriginalVertices();
-  
-  int prevIndex = (currentIndex - 1 + vertices.size()) % vertices.size();
-  int twicePrevIndex = (currentIndex - 2 + vertices.size()) % vertices.size();
-  
-  vector<glm::vec3> accelerations(vertices[currentIndex].size());
-  for (int i = 0; i < vertices[currentIndex].size(); ++i) {
-    auto& current = vertices[currentIndex][i];
-    auto& prev = vertices[prevIndex][i];
-    auto& twicePrev = vertices[twicePrevIndex][i];
-    
-    auto currentVelocity = (current - prev)/(times[currentIndex] - times[prevIndex]);
-    auto prevVelocity = (prev - twicePrev)/(times[prevIndex] - times[twicePrevIndex]);
-    
-    accelerations[i] = (currentVelocity - prevVelocity)/(times[currentIndex] - times[prevIndex]);
-  }
-  
-  callback(vertices[currentIndex], accelerations);
-}
-void DisplacedMesh::AnimatedMesh::draw() {
-  if (USE_SHADER) {
-    original.drawFaces();
-  } else {
-    mesh.draw();
-  }
-}
-void DisplacedMesh::AnimatedMesh::drawWireframe() {
-  if (USE_SHADER) {
-    original.drawWireframe();
-  } else {
-    mesh.drawWireframe();
-  }
-}
-vector<glm::vec3>& DisplacedMesh::AnimatedMesh::getVertices() {
-  return mesh.getVertices();
-}
-vector<glm::vec3> DisplacedMesh::AnimatedMesh::getOriginalVertices() {
-  return original.getCurrentAnimatedMesh(0).getVertices();
-}
-
-
-DisplacedMesh::AnimatedMesh::TransformFreeScene::TransformFreeScene(const ofxAssimpModelLoader& other): ofxAssimpModelLoader(other) {}
-void DisplacedMesh::AnimatedMesh::TransformFreeScene::update() {
-  ofxAssimpModelLoader::update();
-  modelMeshes[0].matrix.makeIdentityMatrix();
-  modelMatrix.makeIdentityMatrix();
 }

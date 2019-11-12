@@ -1,8 +1,7 @@
 #include "ofApp.h"
+#include "constants.h"
+#include "AnimatedMesh.h"
 
-constexpr int FRAME_RATE = 30;
-
-constexpr bool SAVE_SCREENSHOTS = false;
 
 //--------------------------------------------------------------
 void ofApp::setup() {
@@ -27,7 +26,7 @@ void ofApp::setup() {
 //    vertex.y += 1.5;
 //  }
 
-  displacedMesh = make_shared<DisplacedMesh>(DisplacedMesh::AnimatedMesh(loader, [&](const vector<glm::vec3>& vertices, const vector<glm::vec3>& accelerations) {
+  displacedMesh = make_shared<DisplacedMesh>(AnimatedMesh(loader, [&](const vector<glm::vec3>& vertices, const vector<glm::vec3>& accelerations) {
     if (ofGetFrameNum() < 3) return;
     
     list<ImpulseKelvinlet> potentialKelvinlets;

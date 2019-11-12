@@ -4,6 +4,7 @@
 #include "Kelvinlet.h"
 #include "ImpulseKelvinlet.h"
 #include "PushKelvinlet.h"
+#include "Mesh.h"
 
 #include <functional>
 
@@ -11,54 +12,6 @@
 
 class DisplacedMesh {
 public:
-  
-  // Abstract class representing any displaceable mesh
-  class Mesh {
-  public:
-    virtual void update(float t) = 0;
-    virtual void draw() = 0;
-    virtual void drawWireframe() = 0;
-    virtual vector<glm::vec3>& getVertices() = 0;
-    virtual vector<glm::vec3> getOriginalVertices() = 0;
-  };
-  
-  class StaticMesh: public Mesh {
-  public:
-    StaticMesh(const ofMesh& mesh);
-    virtual void update(float t) override;
-    virtual void draw() override;
-    virtual void drawWireframe() override;
-    virtual vector<glm::vec3>& getVertices() override;
-    virtual vector<glm::vec3> getOriginalVertices() override;
-    
-  private:
-    ofMesh original;
-    ofMesh mesh;
-  };
-  
-  class AnimatedMesh: public Mesh {
-  public:
-    AnimatedMesh(const ofxAssimpModelLoader& mesh, const function<void(const vector<glm::vec3>&, const vector<glm::vec3>&)>& callback);
-    virtual void update(float t) override;
-    virtual void draw() override;
-    virtual void drawWireframe() override;
-    virtual vector<glm::vec3>& getVertices() override;
-    virtual vector<glm::vec3> getOriginalVertices() override;
-    
-  private:
-    class TransformFreeScene: public ofxAssimpModelLoader {
-    public:
-      TransformFreeScene(const ofxAssimpModelLoader& other);
-      void update();
-    };
-    TransformFreeScene original;
-    ofMesh mesh;
-    function<void(const vector<glm::vec3>&, const vector<glm::vec3>&)> callback;
-    array<vector<glm::vec3>, 3> vertices;
-    array<float, 3> times;
-    int currentIndex = -1;
-  };
-  
   template<typename MeshType>
   DisplacedMesh(const MeshType& mesh, Material material):
     mesh(make_shared<MeshType>(mesh)),
