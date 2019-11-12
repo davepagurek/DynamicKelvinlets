@@ -5,9 +5,61 @@
 #include "ImpulseKelvinlet.h"
 #include "PushKelvinlet.h"
 
+#include "ofxAssimpModelLoader.h"
+
 class DisplacedMesh {
 public:
-  DisplacedMesh(ofMesh mesh, Material material);
+  
+  // Abstract class representing any displaceable mesh
+  class Mesh {
+  public:
+    virtual void update() = 0;
+    virtual void draw() = 0;
+    virtual void drawWireframe() = 0;
+    virtual vector<glm::vec3>& getVertices() = 0;
+    virtual vector<glm::vec3> getOriginalVertices() = 0;
+  };
+  
+  class StaticMesh: public Mesh {
+  public:
+    StaticMesh(const ofMesh& mesh);
+    virtual void update() override;
+    virtual void draw() override;
+    virtual void drawWireframe() override;
+    virtual vector<glm::vec3>& getVertices() override;
+    virtual vector<glm::vec3> getOriginalVertices() override;
+    
+  private:
+    ofMesh original;
+    ofMesh mesh;
+  };
+  
+  class AnimatedMesh: public Mesh {
+  public:
+    AnimatedMesh(const ofxAssimpModelLoader& mesh);
+    virtual void update() override;
+    virtual void draw() override;
+    virtual void drawWireframe() override;
+    virtual vector<glm::vec3>& getVertices() override;
+    virtual vector<glm::vec3> getOriginalVertices() override;
+    
+  private:
+    class TransformFreeScene: public ofxAssimpModelLoader {
+    public:
+      TransformFreeScene(const ofxAssimpModelLoader& other);
+      void update();
+    };
+    TransformFreeScene original;
+    ofMesh mesh;
+  };
+  
+  template<typename MeshType>
+  DisplacedMesh(const MeshType& mesh, Material material):
+    mesh(make_shared<MeshType>(mesh)),
+    material(material),
+    currentTime(0)
+  {}
+  
   void setup();
   void update(float elapsedTime);
   
@@ -21,13 +73,12 @@ public:
     kelvinlet.center -= offset;
     kelvinlets.push_back(DisplacedMesh::TimeShiftedKelvinlet{
       .kelvinlet=make_shared<KelvinletType>(kelvinlet),
-      .t0=currentTime,
-      .initialLocations=mesh.getVertices()
+      .t0=currentTime
     });
   }
   
-  void draw() const;
-  void drawWireframe() const;
+  void draw();
+  void drawWireframe();
   
 private:
   // Because Kelvinlets measure distances from their centers to points at the time
@@ -36,19 +87,17 @@ private:
   struct TimeShiftedKelvinlet {
     const shared_ptr<Kelvinlet> kelvinlet;
     float t0;
-    vector<glm::vec3> initialLocations;
     
     glm::vec3 displacement(Material material, float t, const glm::vec3& position) const;
-    const vector<glm::vec3>& displacements(Material material, float t) const;
+    const vector<glm::vec3>& displacements(Material material, float t, const vector<glm::vec3>& vertices) const;
   };
   
   ofShader shader;
   void shaderStart() const;
   void shaderEnd() const;
   
-  ofMesh mesh;
+  shared_ptr<Mesh> mesh;
   Material material;
   float currentTime;
-  vector<glm::vec3> originalPositions;
   vector<TimeShiftedKelvinlet> kelvinlets;
 };

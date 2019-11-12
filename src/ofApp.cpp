@@ -7,26 +7,39 @@ constexpr bool SAVE_SCREENSHOTS = false;
 //--------------------------------------------------------------
 void ofApp::setup() {
   ofSetFrameRate(FRAME_RATE);
-  ofMesh mesh;
-  mesh.load("dragon_vrip_res4.ply");
-  for (auto& vertex : mesh.getVertices()) {
-    vertex = vertex * 15;
-    vertex.y *= -1;
-    vertex.y += 1.5;
-  }
 
-  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(15, 0.4));
+  ofxAssimpModelLoader loader;
+  loader.loadModel("elephant-skinned-baked-27.dae");
+  loader.setLoopStateForAllAnimations(OF_LOOP_NORMAL);
+  loader.playAllAnimations();
+  loader.disableMaterials();
+  loader.disableColors();
+//  auto mesh = loader.getMesh(loader.getMeshNames().front());
+//  for (auto& vertex : mesh.getVertices()) {
+//    vertex *= 0.25;
+//  }
+  
+//  ofMesh mesh;
+//  mesh.load("dragon_vrip_res4.ply");
+//  for (auto& vertex : mesh.getVertices()) {
+//    vertex = vertex * 15;
+//    vertex.y *= -1;
+//    vertex.y += 1.5;
+//  }
+
+  displacedMesh = make_shared<DisplacedMesh>(DisplacedMesh::AnimatedMesh(loader), Material(15, 0.4));
 //  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 28), Material(20, 0.1));
   displacedMesh->setup();
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
+//  loader.update();
   if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet(PushKelvinlet({15, 0, 0}, {-0.5, 0, 0}, 1));
+    displacedMesh->addKelvinlet(PushKelvinlet({0, -200, 0}, {0, 2, 0}, 1));
   }
-  if (ofGetFrameNum() == 30+15) {
-    displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -15}, {0, 0, 0.5}, 1));
+  if (ofGetFrameNum() == 60+15) {
+    displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -50}, {0, 0, 5}, 1));
   }
 
   displacedMesh->update(1.0f / FRAME_RATE);
@@ -40,16 +53,19 @@ void ofApp::draw() {
   ofClear(ofColor::white);
   ofEnableDepthTest();
 
-  constexpr float scale = 170;
-//  constexpr float scale = 20;
+//  constexpr float scale = 170;
+  constexpr float scale = 50;
 
   for (bool outline : {false, true}) {
     ofPushMatrix();
     // Push 1px closer to the camera when drawing the outline so it goes on top of the background
     ofTranslate(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, outline ? 1 : 0);
-    ofRotateXDeg(-20);
-    ofRotateYDeg(10);
+//    ofRotateYDeg(-10);
+//    ofRotateXDeg(-90);
+    ofRotateZDeg(180);
+    ofRotateYDeg(-70);
     ofScale(scale);
+//    ofScale(0.25);
     ofSetColor(outline ? ofColor::black : ofColor::white);
     if (outline) {
       displacedMesh->drawWireframe();
