@@ -4,24 +4,36 @@
 #include "Kelvinlet.h"
 #include "ImpulseKelvinlet.h"
 #include "PushKelvinlet.h"
+#include "Mesh.h"
+
+#include <functional>
+
+#include "ofxAssimpModelLoader.h"
 
 class DisplacedMesh {
 public:
-  DisplacedMesh(ofMesh mesh, Material material);
+  template<typename MeshType>
+  DisplacedMesh(const MeshType& mesh, Material material):
+    mesh(make_shared<MeshType>(mesh)),
+    material(material),
+    currentTime(0)
+  {}
+  
   void setup();
   void update(float elapsedTime);
   
   template <typename KelvinletType>
-  void addKelvinlet(const KelvinletType kelvinlet) {
+  void addKelvinlet(KelvinletType kelvinlet) {
+//    cout << kelvinlet.center << endl;
     kelvinlets.push_back(DisplacedMesh::TimeShiftedKelvinlet{
       .kelvinlet=make_shared<KelvinletType>(kelvinlet),
-      .t0=currentTime,
-      .initialLocations=mesh.getVertices()
+      .t0=currentTime
     });
   }
   
-  void draw() const;
-  void drawWireframe() const;
+  void draw();
+  void drawWireframe();
+  void drawForces();
   
 private:
   // Because Kelvinlets measure distances from their centers to points at the time
@@ -30,18 +42,18 @@ private:
   struct TimeShiftedKelvinlet {
     const shared_ptr<Kelvinlet> kelvinlet;
     float t0;
-    vector<glm::vec3> initialLocations;
     
-    const vector<glm::vec3>& displacements(Material material, float t) const;
+    glm::vec3 displacement(Material material, float t, const glm::vec3& position) const;
+    const vector<glm::vec3>& displacements(Material material, float t, const vector<glm::vec3>& vertices) const;
   };
   
   ofShader shader;
   void shaderStart() const;
   void shaderEnd() const;
   
-  ofMesh mesh;
+  shared_ptr<Mesh> mesh;
   Material material;
   float currentTime;
-  vector<glm::vec3> originalPositions;
-  vector<TimeShiftedKelvinlet> kelvinlets;
+  list<TimeShiftedKelvinlet> kelvinlets;
+  ofMesh forceMesh;
 };

@@ -1,14 +1,15 @@
 #version 330
+#define MAX_KELVINLETS 5
 
 uniform mat4 modelViewProjectionMatrix;
 in vec4 position;
 
 uniform int numKelvinlets;
-uniform vec3 kelvinletCenters[5];
-uniform vec3 kelvinletForces[5];
-uniform float kelvinletTimes[5];
-uniform float kelvinletScales[5];
-uniform int kelvinletTypes[5];
+uniform vec3 kelvinletCenters[MAX_KELVINLETS];
+uniform vec3 kelvinletForces[MAX_KELVINLETS];
+uniform float kelvinletTimes[MAX_KELVINLETS];
+uniform float kelvinletScales[MAX_KELVINLETS];
+uniform int kelvinletTypes[MAX_KELVINLETS];
 uniform float alpha;
 uniform float beta;
 

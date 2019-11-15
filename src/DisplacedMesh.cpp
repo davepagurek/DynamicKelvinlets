@@ -1,46 +1,50 @@
 #include "DisplacedMesh.h"
-
-constexpr bool USE_SHADER = true;
+#include "constants.h"
 
 string slurp(string path) {
   return ofFile(path).readToBuffer().getText();
 }
 
-DisplacedMesh::DisplacedMesh(ofMesh mesh, Material material):
-  mesh(mesh),
-  material(material),
-  currentTime(0),
-  originalPositions(mesh.getVertices())
-{}
-
 void DisplacedMesh::setup() {
-  ofShaderSettings settings;
+  if (USE_SHADER) {
+    ofShaderSettings settings;
+    
+    string vertexShaderSource =
+      slurp("shaders/header.vert") +
+      slurp("shaders/displacement-impulse.vert") +
+      slurp("shaders/displacement-push.vert") +
+      slurp("shaders/footer.vert");
+    string fragmentShaderSource = slurp("shaders/displacement.frag");
+    
+    settings.shaderSources[GL_VERTEX_SHADER] = vertexShaderSource;
+    settings.shaderSources[GL_FRAGMENT_SHADER] = fragmentShaderSource;
+    settings.intDefines["MAX_KELVINLETS"] = MAX_KELVINLETS;
+    shader.setup(settings);
+  }
   
-  string vertexShaderSource =
-    slurp("shaders/header.vert") +
-    slurp("shaders/displacement-impulse.vert") +
-    slurp("shaders/displacement-push.vert") +
-    slurp("shaders/footer.vert");
-  string fragmentShaderSource = slurp("shaders/displacement.frag");
-  
-  settings.shaderSources[GL_VERTEX_SHADER] = vertexShaderSource;
-  settings.shaderSources[GL_FRAGMENT_SHADER] = fragmentShaderSource;
-  shader.setup(settings);
+  forceMesh = ofMesh::cone(0.2, 0.2, 3, 2);
 }
 
 void DisplacedMesh::update(float elapsedTime) {
   currentTime += elapsedTime;
+  mesh->update(currentTime);
 
-  // TODO remove kelvinlets with no influence
+  // Remove old Kelvinlets
+  for (auto it = kelvinlets.begin(); it != kelvinlets.end();) {
+    if (currentTime - it->t0 > MAX_KELVINLET_LIFE && it->kelvinlet->type() == 0) {
+      it = kelvinlets.erase(it);
+    } else {
+      ++it;
+    }
+  }
 
   if (!USE_SHADER) {
-    mesh.getVertices() = originalPositions;
-
+    mesh->getVertices() = mesh->getOriginalVertices();
     // Take the superposition of offsets from all applied Kelvinlets
     for (auto& kelvinlet_ts: kelvinlets) {
-      const vector<glm::vec3>& offsets = kelvinlet_ts.displacements(material, currentTime);
-      for (size_t i = 0; i < mesh.getNumVertices(); i++) {
-        mesh.setVertex(i, mesh.getVertex(i) + offsets[i]);
+      const vector<glm::vec3>& offsets = kelvinlet_ts.displacements(material, currentTime, mesh->getOriginalVertices());
+      for (size_t i = 0; i < mesh->getOriginalVertices().size(); i++) {
+        mesh->getVertices()[i] += offsets[i];
       }
     }
   }
@@ -65,12 +69,20 @@ void DisplacedMesh::shaderStart() const {
   times.clear();
   scales.clear();
   
+  int i = 0;
   for (auto& k : kelvinlets) {
     types.push_back(k.kelvinlet->type());
     for (size_t i : {0, 1, 2}) centers.push_back(k.kelvinlet->center[i]);
     for (size_t i : {0, 1, 2}) forces.push_back(k.kelvinlet->force[i]);
     times.push_back(currentTime - k.t0);
     scales.push_back(k.kelvinlet->scale);
+    
+    ++i;
+    if (i >= MAX_KELVINLETS) break;
+  }
+  
+  if (kelvinlets.size() > MAX_KELVINLETS) {
+    cout << "More Kelvinlets (" << kelvinlets.size() << ") than MAX_KELVINLETS (" << MAX_KELVINLETS << "), omitting some" << endl;
   }
   
   shader.setUniform1iv("kelvinletTypes", types.data(), kelvinlets.size());
@@ -84,26 +96,41 @@ void DisplacedMesh::shaderEnd() const {
   shader.end();
 }
 
-void DisplacedMesh::draw() const {
+void DisplacedMesh::draw() {
   if (USE_SHADER) shaderStart();
-  mesh.draw();
+  mesh->draw();
   if (USE_SHADER) shaderEnd();
 //  cout << ofGetFrameRate() << endl;
 }
 
-void DisplacedMesh::drawWireframe() const {
+void DisplacedMesh::drawWireframe() {
   if (USE_SHADER) shaderStart();
-  mesh.drawWireframe();
+  mesh->drawWireframe();
   if (USE_SHADER) shaderEnd();
 }
 
-const vector<glm::vec3>& DisplacedMesh::TimeShiftedKelvinlet::displacements(Material material, float t) const {
+void DisplacedMesh::drawForces() {
+  for (const auto& k : kelvinlets) {
+    ofPushMatrix();
+    ofTranslate(k.kelvinlet->center);
+    ofMultMatrix(glm::toMat4(glm::rotation({0, 1, 0}, glm::normalize(k.kelvinlet->force))));
+    ofScale(glm::length(k.kelvinlet->force));
+    forceMesh.draw();
+    ofPopMatrix();
+  }
+}
+
+glm::vec3 DisplacedMesh::TimeShiftedKelvinlet::displacement(Material material, float t, const glm::vec3& position) const {
+  return kelvinlet->displacementRK4(position, material, t - t0);
+}
+
+const vector<glm::vec3>& DisplacedMesh::TimeShiftedKelvinlet::displacements(Material material, float t, const vector<glm::vec3>& vertices) const {
   static vector<glm::vec3> result;
   result.clear();
 
   // Apply displacements to every point
-  for (auto& point : initialLocations) {
-    result.push_back(kelvinlet->displacementRK4(point, material, t - t0));
+  for (auto& point : vertices) {
+    result.push_back(displacement(material, t, point));
   }
 
   return result;
