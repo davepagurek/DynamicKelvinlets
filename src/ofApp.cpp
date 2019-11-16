@@ -22,10 +22,10 @@ void ofApp::setup() {
 
 //--------------------------------------------------------------
 void ofApp::update() {
-  if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet(PushKelvinlet({15, 0, 0}, {-0.5, 0, 0}, 1));
-  }
-  if (ofGetFrameNum() == 30+15) {
+//  if (ofGetFrameNum() == 15) {
+//    displacedMesh->addKelvinlet(PushKelvinlet({15, 0, 0}, {-0.5, 0, 0}, 1));
+//  }
+  if (ofGetFrameNum() == 0) {
     displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -15}, {0, 0, 0.5}, 1));
   }
 

@@ -1,6 +1,6 @@
 #include "DisplacedMesh.h"
 
-constexpr bool USE_SHADER = true;
+constexpr bool USE_SHADER = false;
 
 string slurp(string path) {
   return ofFile(path).readToBuffer().getText();
@@ -44,6 +44,19 @@ void DisplacedMesh::update(float elapsedTime) {
       }
     }
   }
+  
+  ofstream obj;
+  stringstream path;
+  path << "dk/dk" << setfill('0') << setw(3) << ofGetFrameNum() << ".obj";
+  obj.open(ofToDataPath(path.str()), ios::out);
+  obj << fixed << setprecision(6);
+  for (auto& vertex : mesh.getVertices()) {
+    obj << "v " << vertex.x << " " << vertex.y << " " << vertex.z << endl;
+  }
+  for (size_t i = 0; i < mesh.getNumIndices(); i += 3) {
+    obj << "f " << (mesh.getIndex(i+2)+1) << " " << (mesh.getIndex(i+1)+1) << " " << (mesh.getIndex(i)+1) << endl;
+  }
+  obj.close();
 }
 
 void DisplacedMesh::shaderStart() const {
