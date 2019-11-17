@@ -1,35 +1,55 @@
 #include "ofApp.h"
-
-constexpr int FRAME_RATE = 30;
-
-constexpr bool SAVE_SCREENSHOTS = false;
+#include "AnimatedMesh.h"
+#include "StaticMesh.h"
+#include "constants.h"
 
 //--------------------------------------------------------------
 void ofApp::setup() {
   ofSetFrameRate(FRAME_RATE);
-  ofMesh mesh;
-  mesh.load("dragon_vrip_res4.ply");
-  for (auto& vertex : mesh.getVertices()) {
-    vertex = vertex * 15;
-    vertex.y *= -1;
-    vertex.y += 1.5;
+
+  if (USE_STATIC_MESH) {
+    ofMesh mesh;
+    mesh.load("dragon_vrip_res4.ply");
+    for (auto& vertex : mesh.getVertices()) {
+      vertex = vertex * 15;
+      vertex.y *= -1;
+      vertex.y += 1.5;
+    }
+    displacedMesh = make_shared<DisplacedMesh>(StaticMesh(mesh), Material(15, 0.4));
+
+  } else {
+
+    ofxAssimpModelLoader loader;
+    loader.loadModel("elephant-skinned-baked-27.dae");
+    loader.setLoopStateForAllAnimations(OF_LOOP_NORMAL);
+    loader.playAllAnimations();
+    loader.disableMaterials();
+    loader.disableColors();
+
+    displacedMesh = make_shared<DisplacedMesh>(
+        AnimatedMesh(
+            loader,
+            kelvinletGenerator(displacedMesh)),
+        Material(15, 0.4));
   }
 
-  displacedMesh = make_shared<DisplacedMesh>(mesh, Material(15, 0.4));
-//  displacedMesh = make_shared<DisplacedMesh>(ofMesh::sphere(10, 28), Material(20, 0.1));
   displacedMesh->setup();
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
-  if (ofGetFrameNum() == 15) {
-    displacedMesh->addKelvinlet(PushKelvinlet({15, 0, 0}, {-0.5, 0, 0}, 1));
-  }
-  if (ofGetFrameNum() == 30+15) {
-    displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -15}, {0, 0, 0.5}, 1));
+
+  if (USE_STATIC_MESH) {
+    if (ofGetFrameNum() == 15) {
+      displacedMesh->addKelvinlet(PushKelvinlet({0, -200, 0}, {0, 2, 0}, 1));
+    }
+    if (ofGetFrameNum() == 60 + 15) {
+      displacedMesh->addKelvinlet(ImpulseKelvinlet({0, 0, -50}, {0, 0, 5}, 1));
+    }
   }
 
   displacedMesh->update(1.0f / FRAME_RATE);
+
   if (SAVE_SCREENSHOTS) {
     ofSaveScreen(ofToString(ofGetFrameNum()) + ".png");
   }
@@ -40,19 +60,24 @@ void ofApp::draw() {
   ofClear(ofColor::white);
   ofEnableDepthTest();
 
-  constexpr float scale = 170;
-//  constexpr float scale = 20;
+  constexpr float scale = USE_STATIC_MESH ? 100 : 50;
 
   for (bool outline : {false, true}) {
     ofPushMatrix();
     // Push 1px closer to the camera when drawing the outline so it goes on top of the background
     ofTranslate(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, outline ? 1 : 0);
-    ofRotateXDeg(-20);
-    ofRotateYDeg(10);
+    if (!USE_STATIC_MESH)
+      ofRotateZDeg(180);
+    ofRotateYDeg(-70);
     ofScale(scale);
     ofSetColor(outline ? ofColor::black : ofColor::white);
     if (outline) {
       displacedMesh->drawWireframe();
+
+      if (SHOW_KELVINLETS) {
+        ofSetColor(ofColor::red);
+        displacedMesh->drawForces();
+      }
     } else {
       displacedMesh->draw();
     };
