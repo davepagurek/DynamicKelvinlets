@@ -20,7 +20,7 @@ void ofApp::setup() {
   } else {
 
     ofxAssimpModelLoader loader;
-    loader.loadModel("elephant-skinned-baked-27.dae");
+    loader.loadModel("drop2-no-squash-baked.dae");
     loader.setLoopStateForAllAnimations(OF_LOOP_NORMAL);
     loader.playAllAnimations();
     loader.disableMaterials();
@@ -29,7 +29,8 @@ void ofApp::setup() {
     displacedMesh = make_shared<DisplacedMesh>(
         AnimatedMesh(
             loader,
-            kelvinletGenerator(displacedMesh)),
+            kelvinletGenerator(displacedMesh),
+            AnimatedMesh::LoopType::DISCONTINUOUS),
         Material(15, 0.4));
   }
 

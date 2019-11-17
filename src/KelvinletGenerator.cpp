@@ -3,10 +3,6 @@
 
 KelvinletGenerator kelvinletGenerator(const shared_ptr<DisplacedMesh>& displacedMesh) {
   return [&](const vector<glm::vec3>& vertices, const vector<glm::vec3>& accelerations) {
-    // Need at least 3 frames to have enough data to calculate accelerations
-    if (ofGetFrameNum() < 3)
-      return;
-
     // Come up with Kelvinlets given the acceleration of each vertex
     list<ImpulseKelvinlet> potentialKelvinlets;
     for (size_t i = 0; i < accelerations.size(); ++i) {
