@@ -51,7 +51,9 @@ void ofApp::update() {
   displacedMesh->update(1.0f / FRAME_RATE);
 
   if (SAVE_SCREENSHOTS) {
-    ofSaveScreen(ofToString(ofGetFrameNum()) + ".png");
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(5) << std::to_string(ofGetFrameNum()) << ".png";
+    ofSaveScreen(ss.str());
   }
 }
 
