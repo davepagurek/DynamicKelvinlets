@@ -11,8 +11,8 @@ KelvinletGenerator kelvinletGenerator(const shared_ptr<DisplacedMesh>& displaced
     list<ImpulseKelvinlet> potentialKelvinlets;
     for (size_t i = 0; i < accelerations.size(); ++i) {
       // TODO rethink this threshold, the Kelvinlet force magnitude, the regularization, etc
-      if (glm::length2(accelerations[i]) > 1500) {
-        glm::vec3 force = 0.1 * accelerations[i];
+      if (glm::length2(accelerations[i]) > 4000) {
+        glm::vec3 force = 0.0005 * accelerations[i];
         potentialKelvinlets.push_back(ImpulseKelvinlet(force, vertices[i], 0.2));
       }
     }
