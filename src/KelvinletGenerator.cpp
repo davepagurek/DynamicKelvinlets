@@ -3,10 +3,6 @@
 
 KelvinletGenerator kelvinletGenerator(const shared_ptr<DisplacedMesh>& displacedMesh) {
   return [&](const vector<glm::vec3>& vertices, const vector<glm::vec3>& accelerations) {
-    // Need at least 3 frames to have enough data to calculate accelerations
-    if (ofGetFrameNum() < 3)
-      return;
-
     // Come up with Kelvinlets given the acceleration of each vertex
     list<ImpulseKelvinlet> potentialKelvinlets;
     for (size_t i = 0; i < accelerations.size(); ++i) {
@@ -24,13 +20,16 @@ KelvinletGenerator kelvinletGenerator(const shared_ptr<DisplacedMesh>& displaced
 
       for (auto a = potentialKelvinlets.begin(); a != potentialKelvinlets.end(); ++a) {
         for (auto b = next(a); b != potentialKelvinlets.end();) {
-          if (glm::distance(a->center, b->center) / (a->scale + b->scale) < 1) {
+          if (glm::distance(a->center, b->center) < (a->approxRadius(0.1) + b->approxRadius(0.1)) &&
+              glm::dot(glm::normalize(a->force), glm::normalize(b->force)) > 0.5) {
             // Combine kelvinlets
-            // TODO do this in a less arbitrary way
-            float weight = a->scale / (a->scale + b->scale);
-            a->scale = max(a->scale, glm::distance(a->center, b->center) + b->scale);
-            a->force = a->force + b->force / max(1.f, glm::distance(a->center, b->center));
-            a->center = weight * a->center + (1 - weight) * b->center;
+            float magA = glm::length(a->force);
+            float magB = glm::length(b->force);
+            float newScale = (a->scale*magA + b->scale*magB + min(magA, magB)*glm::distance(a->center, b->center))/(magA + magB);
+            float newMag = newScale*newScale * (magA/(a->scale*a->scale) + magB/(b->scale*b->scale));
+            a->scale = newScale;
+            a->force = glm::normalize(magA*a->force + magB*b->force) * newScale;
+            a->center = (magA*a->center + magB*b->center)/(magA + magB);
             b = potentialKelvinlets.erase(b);
           } else {
             ++b;

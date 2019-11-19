@@ -1,7 +1,8 @@
 #include "AnimatedMesh.h"
 #include "constants.h"
 
-AnimatedMesh::AnimatedMesh(const ofxAssimpModelLoader& loaderMesh, const KelvinletGenerator& callback):
+AnimatedMesh::AnimatedMesh(const ofxAssimpModelLoader& loaderMesh, const KelvinletGenerator& callback, AnimatedMesh::LoopType loopType):
+smoothLoop(loopType == AnimatedMesh::LoopType::CONTINUOUS),
 original(loaderMesh),
 callback(callback)
 {
@@ -9,7 +10,15 @@ callback(callback)
   mesh.addIndices(original.getCurrentAnimatedMesh(0).getIndices());
 }
 void AnimatedMesh::update(float t) {
+  float oldPos = original.getAnimation(0).getPosition();
   original.update();
+  float newPos = original.getAnimation(0).getPosition();
+  
+  // If the animation just looped without continuity, don't count old frames for accelerations
+  if (newPos < oldPos && !smoothLoop) {
+    numFrames = 0;
+  }
+  
   if (currentIndex == -1) {
     for (int i = vertices.size()-1; i > 0; --i) {
       times[i] = t - (vertices.size() - i) * 0.01;
@@ -19,23 +28,28 @@ void AnimatedMesh::update(float t) {
   currentIndex = (currentIndex + 1) % vertices.size();
   times[currentIndex] = t;
   vertices[currentIndex] = getOriginalVertices();
+  if (numFrames < vertices.size()) numFrames++;
   
-  int prevIndex = (currentIndex - 1 + vertices.size()) % vertices.size();
-  int twicePrevIndex = (currentIndex - 2 + vertices.size()) % vertices.size();
+  // Don't call the acceleration callback if there isn't enough data to calculate accelerations
+  if (numFrames == 3) {
   
-  vector<glm::vec3> accelerations(vertices[currentIndex].size());
-  for (int i = 0; i < vertices[currentIndex].size(); ++i) {
-    auto& current = vertices[currentIndex][i];
-    auto& prev = vertices[prevIndex][i];
-    auto& twicePrev = vertices[twicePrevIndex][i];
+    int prevIndex = (currentIndex - 1 + vertices.size()) % vertices.size();
+    int twicePrevIndex = (currentIndex - 2 + vertices.size()) % vertices.size();
     
-    auto currentVelocity = (current - prev)/(times[currentIndex] - times[prevIndex]);
-    auto prevVelocity = (prev - twicePrev)/(times[prevIndex] - times[twicePrevIndex]);
-    
-    accelerations[i] = (currentVelocity - prevVelocity)/(times[currentIndex] - times[prevIndex]);
+    vector<glm::vec3> accelerations(vertices[currentIndex].size());
+    for (int i = 0; i < vertices[currentIndex].size(); ++i) {
+      auto& current = vertices[currentIndex][i];
+      auto& prev = vertices[prevIndex][i];
+      auto& twicePrev = vertices[twicePrevIndex][i];
+      
+      auto currentVelocity = (current - prev)/(times[currentIndex] - times[prevIndex]);
+      auto prevVelocity = (prev - twicePrev)/(times[prevIndex] - times[twicePrevIndex]);
+      
+      accelerations[i] = (currentVelocity - prevVelocity)/(times[currentIndex] - times[prevIndex]);
+    }
+  
+    callback(vertices[currentIndex], accelerations);
   }
-  
-  callback(vertices[currentIndex], accelerations);
 }
 void AnimatedMesh::draw() {
   if (USE_SHADER) {

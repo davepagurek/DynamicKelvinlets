@@ -4,7 +4,9 @@
 
 class AnimatedMesh: public Mesh {
 public:
-  AnimatedMesh(const ofxAssimpModelLoader& mesh, const KelvinletGenerator& callback);
+  enum LoopType { CONTINUOUS, DISCONTINUOUS };
+  
+  AnimatedMesh(const ofxAssimpModelLoader& mesh, const KelvinletGenerator& callback, LoopType loopType = LoopType::CONTINUOUS);
   virtual void update(float t) override;
   virtual void draw() override;
   virtual void drawWireframe() override;
@@ -20,9 +22,11 @@ private:
   
   TransformFreeScene original;
   
+  bool smoothLoop;
   ofMesh mesh;
   KelvinletGenerator callback;
   array<vector<glm::vec3>, 3> vertices;
   array<float, 3> times;
   int currentIndex = -1;
+  int numFrames = 0;
 };
