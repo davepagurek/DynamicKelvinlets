@@ -3,13 +3,17 @@
 
 KelvinletGenerator kelvinletGenerator(const shared_ptr<DisplacedMesh>& displacedMesh) {
   return [&](const vector<glm::vec3>& vertices, const vector<glm::vec3>& accelerations) {
+    // assume that the mass of body is distributed equally among mesh vertices
+    float mass = displacedMesh->getMesh()->getMass();
+    float massPerVert = mass / vertices.size();
+
     // Come up with Kelvinlets given the acceleration of each vertex
     list<ImpulseKelvinlet> potentialKelvinlets;
     for (size_t i = 0; i < accelerations.size(); ++i) {
       // TODO rethink this threshold, the Kelvinlet force magnitude, the regularization, etc
       if (glm::length2(accelerations[i]) > 4000) {
-        glm::vec3 force = 0.0005 * accelerations[i];
-        potentialKelvinlets.push_back(ImpulseKelvinlet(force, vertices[i], 0.2));
+        glm::vec3 force = massPerVert * accelerations[i];
+        potentialKelvinlets.push_back(ImpulseKelvinlet(force, vertices[i], 0.8));
       }
     }
 

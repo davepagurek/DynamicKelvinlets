@@ -26,11 +26,11 @@ void ofApp::setup() {
     loader.disableMaterials();
     loader.disableColors();
 
+    float mass = 0.001;
+
     displacedMesh = make_shared<DisplacedMesh>(
-        AnimatedMesh(
-            loader,
-            kelvinletGenerator(displacedMesh),
-            AnimatedMesh::LoopType::DISCONTINUOUS),
+        AnimatedMesh(loader, mass, kelvinletGenerator(displacedMesh),
+                     AnimatedMesh::LoopType::DISCONTINUOUS),
         Material(15, 0.4));
   }
 
