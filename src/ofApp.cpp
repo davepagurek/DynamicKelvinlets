@@ -20,7 +20,7 @@ void ofApp::setup() {
   } else {
 
     ofxAssimpModelLoader loader;
-    loader.loadModel("drop2-no-squash-baked.dae");
+    loader.loadModel("stomp-baked.dae");
     loader.setLoopStateForAllAnimations(OF_LOOP_NORMAL);
     loader.playAllAnimations();
     loader.disableMaterials();

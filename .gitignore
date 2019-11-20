@@ -27,3 +27,5 @@ bin/DynamicKelvinlets*
 
 # Makefile
 Makefile
+
+*.blend1

@@ -18,7 +18,7 @@ glm::vec3 Kelvinlet::displacementRK4(glm::vec3 position, Material material, floa
 
 float Kelvinlet::approxRadius(float maxInfluence) const {
   // The distance from the center at which the force distribution goes down to maxInfluence
-  float det = pow(glm::length(force) * 15 * pow(scale, 4) / (8 * M_PI), 2.0/7.0) - scale*scale;
+  float det = pow(glm::length(force) * 15 * pow(scale, 4) / (maxInfluence * 8 * M_PI), 2.0/7.0) - scale*scale;
   if (det <= 0) return 0;
-  return sqrt(det) / maxInfluence;
+  return sqrt(det);
 }
