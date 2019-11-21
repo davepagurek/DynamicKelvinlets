@@ -96,11 +96,21 @@ void DisplacedMesh::shaderEnd() const {
   shader.end();
 }
 
+shared_ptr<Mesh> DisplacedMesh::getMesh() const
+{
+  return mesh;
+}
+
+void DisplacedMesh::setMesh(const shared_ptr<Mesh> &value)
+{
+  mesh = value;
+}
+
 void DisplacedMesh::draw() {
   if (USE_SHADER) shaderStart();
   mesh->draw();
   if (USE_SHADER) shaderEnd();
-//  cout << ofGetFrameRate() << endl;
+  //  cout << ofGetFrameRate() << endl;
 }
 
 void DisplacedMesh::drawWireframe() {
@@ -135,3 +145,7 @@ const vector<glm::vec3>& DisplacedMesh::TimeShiftedKelvinlet::displacements(Mate
 
   return result;
 }
+
+
+shared_ptr<Mesh> DisplacedMesh::getMesh() const;
+void DisplacedMesh::setMesh(const shared_ptr<Mesh> &value);

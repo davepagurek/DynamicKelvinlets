@@ -1,13 +1,14 @@
 #include "AnimatedMesh.h"
 #include "constants.h"
 
-AnimatedMesh::AnimatedMesh(const ofxAssimpModelLoader& loaderMesh, const KelvinletGenerator& callback, AnimatedMesh::LoopType loopType):
-smoothLoop(loopType == AnimatedMesh::LoopType::CONTINUOUS),
-original(loaderMesh),
-callback(callback)
-{
+AnimatedMesh::AnimatedMesh(const ofxAssimpModelLoader &loaderMesh,
+                           const float mass, const KelvinletGenerator &callback,
+                           AnimatedMesh::LoopType loopType)
+    : smoothLoop(loopType == AnimatedMesh::LoopType::CONTINUOUS),
+      original(loaderMesh), callback(callback) {
   mesh.addVertices(original.getCurrentAnimatedMesh(0).getVertices());
   mesh.addIndices(original.getCurrentAnimatedMesh(0).getIndices());
+  setMass(mass);
 }
 void AnimatedMesh::update(float t) {
   float oldPos = original.getAnimation(0).getPosition();

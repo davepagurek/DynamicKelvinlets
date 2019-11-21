@@ -5,8 +5,10 @@
 class AnimatedMesh: public Mesh {
 public:
   enum LoopType { CONTINUOUS, DISCONTINUOUS };
-  
-  AnimatedMesh(const ofxAssimpModelLoader& mesh, const KelvinletGenerator& callback, LoopType loopType = LoopType::CONTINUOUS);
+
+  AnimatedMesh(const ofxAssimpModelLoader &mesh, const float mass,
+               const KelvinletGenerator &callback,
+               LoopType loopType = LoopType::CONTINUOUS);
   virtual void update(float t) override;
   virtual void draw() override;
   virtual void drawWireframe() override;

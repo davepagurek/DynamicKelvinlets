@@ -420,6 +420,7 @@ src/KelvinletGenerator.cpp
 src/KelvinletGenerator.h
 src/Material.cpp
 src/Material.h
+src/Mesh.cpp
 src/Mesh.h
 src/PushKelvinlet.cpp
 src/PushKelvinlet.h

@@ -34,7 +34,10 @@ public:
   void draw();
   void drawWireframe();
   void drawForces();
-  
+
+  shared_ptr<Mesh> getMesh() const;
+  void setMesh(const shared_ptr<Mesh> &value);
+
 private:
   // Because Kelvinlets measure distances from their centers to points at the time
   // of the force's application, we need to save the location of the mesh's vertices
