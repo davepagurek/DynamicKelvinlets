@@ -186,7 +186,7 @@ Multiple versions of the Dynamic Kelvinlet system were implemented to assess how
   \label{FrameRates}
 \end{table}
 
-Table \ref{FrameRates} shows the resulting frame rate when our different implementations are run on a late-2015 Macbook Pro. Our CPU-based implementations use a single core, and the GPU-based implementation uses the device's onboard Intel Iris Graphics 6100 chip. The reduced-size Stanford Dragon \ref{Stanford} mesh is used, which has 5205 vertices. Two Kelvinlet forces, one push and one impulse, are active on the mesh. The simulation frame rate is capped at 60 frames per second due to the limitations of the platform.
+Table \ref{FrameRates} shows the resulting frame rate when our different implementations are run on a late-2015 Macbook Pro. Our CPU-based implementations use a single core, and the GPU-based implementation uses the device's onboard Intel Iris Graphics 6100 chip. The reduced-size Stanford Dragon \cite{Stanford} mesh is used, which has 5205 vertices. Two Kelvinlet forces, one push and one impulse, are active on the mesh. The simulation frame rate is capped at 60 frames per second due to the limitations of the platform.
 
 Even with 4 RK4 steps, the GPU-based implementation achieves significantly higher frame rates, nearly keeping up with the maximum platform refresh rate. This result supports the original paper's claim that the system can run in real time.
 
