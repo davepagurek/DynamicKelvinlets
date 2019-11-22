@@ -20,7 +20,7 @@ void ofApp::setup() {
   } else {
 
     ofxAssimpModelLoader loader;
-    loader.loadModel("stomp-baked.dae");
+    loader.loadModel("punch-baked.dae");
     loader.setLoopStateForAllAnimations(OF_LOOP_NORMAL);
     loader.playAllAnimations();
     loader.disableMaterials();
@@ -71,6 +71,7 @@ void ofApp::draw() {
     ofTranslate(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, outline ? 1 : 0);
     if (!USE_STATIC_MESH)
       ofRotateZDeg(180);
+    ofRotateYDeg(-90);
     ofRotateYDeg(-70);
     ofScale(scale);
     ofSetColor(outline ? ofColor::black : ofColor::white);
