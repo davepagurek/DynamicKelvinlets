@@ -6,6 +6,9 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
   ofSetFrameRate(FRAME_RATE);
+  if (SAVE_SCREENSHOTS) {
+    frames.reserve(120);
+  }
 
   if (USE_STATIC_MESH) {
     ofMesh mesh;
@@ -20,18 +23,17 @@ void ofApp::setup() {
   } else {
 
     ofxAssimpModelLoader loader;
-    loader.loadModel("punch-baked.dae");
+    loader.loadModel("jump2-baked.dae");
     loader.setLoopStateForAllAnimations(OF_LOOP_NORMAL);
-    loader.playAllAnimations();
     loader.disableMaterials();
     loader.disableColors();
 
-    float mass = 0.001;
+    float mass = 1000;
 
     displacedMesh = make_shared<DisplacedMesh>(
         AnimatedMesh(loader, mass, kelvinletGenerator(displacedMesh),
                      AnimatedMesh::LoopType::DISCONTINUOUS),
-        Material(15, 0.4));
+        Material(15, 0.45));
   }
 
   displacedMesh->setup();
@@ -51,10 +53,9 @@ void ofApp::update() {
 
   displacedMesh->update(1.0f / FRAME_RATE);
 
-  if (SAVE_SCREENSHOTS) {
-    std::stringstream ss;
-    ss << std::setfill('0') << std::setw(5) << std::to_string(ofGetFrameNum()) << ".png";
-    ofSaveScreen(ss.str());
+  if (SAVE_SCREENSHOTS && ofGetFrameNum() > 0) {
+    frames.emplace_back();
+    frames.back().grabScreen(0, 0, ofGetWidth(), ofGetHeight());
   }
 }
 
@@ -105,7 +106,17 @@ void ofApp::mouseDragged(int x, int y, int button) {}
 void ofApp::mousePressed(int x, int y, int button) {}
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button) {}
+void ofApp::mouseReleased(int x, int y, int button) {
+  if (SAVE_SCREENSHOTS) {
+    for (size_t i = 0; i < frames.size(); ++i) {
+      std::stringstream ss;
+      ss << std::setfill('0') << std::setw(5) << std::to_string(i) << ".png";
+      frames[i].save(ss.str());
+      cout << ss.str() << endl;
+    }
+    frames.clear();
+  }
+}
 
 //--------------------------------------------------------------
 void ofApp::mouseEntered(int x, int y) {}

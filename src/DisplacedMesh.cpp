@@ -145,7 +145,3 @@ const vector<glm::vec3>& DisplacedMesh::TimeShiftedKelvinlet::displacements(Mate
 
   return result;
 }
-
-
-shared_ptr<Mesh> DisplacedMesh::getMesh() const;
-void DisplacedMesh::setMesh(const shared_ptr<Mesh> &value);

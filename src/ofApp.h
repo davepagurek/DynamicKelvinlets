@@ -27,4 +27,5 @@ public:
 
 private:
   shared_ptr<DisplacedMesh> displacedMesh;
+  std::vector<ofImage> frames;
 };

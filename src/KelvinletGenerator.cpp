@@ -28,7 +28,7 @@ KelvinletGenerator kelvinletGenerator(const shared_ptr<DisplacedMesh>& displaced
 
       for (auto a = potentialKelvinlets.begin(); a != potentialKelvinlets.end(); ++a) {
         for (auto b = next(a); b != potentialKelvinlets.end();) {
-          if (glm::distance(a->center, b->center) < (a->approxRadius(0.01) + b->approxRadius(0.01)) &&
+          if (glm::distance(a->center, b->center) < (a->approxRadius(0.001) + b->approxRadius(0.001)) &&
               glm::dot(glm::normalize(a->force), glm::normalize(b->force)) > 0.5) {
             // Combine kelvinlets
             float magA = glm::length(a->force);

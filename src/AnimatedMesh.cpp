@@ -9,9 +9,14 @@ AnimatedMesh::AnimatedMesh(const ofxAssimpModelLoader &loaderMesh,
   mesh.addVertices(original.getCurrentAnimatedMesh(0).getVertices());
   mesh.addIndices(original.getCurrentAnimatedMesh(0).getIndices());
   setMass(mass);
+  original.playAllAnimations();
+  original.setPausedForAllAnimations(true);
+  original.update();
 }
 void AnimatedMesh::update(float t) {
   float oldPos = original.getAnimation(0).getPosition();
+  auto& animation = original.getAnimation(0);
+  animation.setPosition(fmod(t / animation.getDurationInSeconds(), 1.f));
   original.update();
   float newPos = original.getAnimation(0).getPosition();
   
