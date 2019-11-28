@@ -26,8 +26,8 @@ public:
   void addKelvinlet(KelvinletType kelvinlet) {
 //    cout << kelvinlet.center << endl;
     kelvinlets.push_back(DisplacedMesh::TimeShiftedKelvinlet{
-      .kelvinlet=make_shared<KelvinletType>(kelvinlet),
-      .t0=currentTime
+      make_shared<KelvinletType>(kelvinlet),
+      currentTime
     });
   }
   

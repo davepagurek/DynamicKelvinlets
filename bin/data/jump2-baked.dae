@@ -3,10 +3,10 @@
   <asset>
     <contributor>
       <author>Blender User</author>
-      <authoring_tool>Blender 2.79.0 commit date:2018-03-22, commit time:14:10, hash:f4dc9f9</authoring_tool>
+      <authoring_tool>Blender 2.79.0 commit date:2017-09-11, commit time:10:43, hash:5bd8ac9</authoring_tool>
     </contributor>
-    <created>2019-11-28T09:10:07</created>
-    <modified>2019-11-28T09:10:07</modified>
+    <created>2019-11-28T15:48:00</created>
+    <modified>2019-11-28T15:48:00</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -768,7 +768,11 @@
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
       <node id="Armature" name="Armature" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0.3412494 0 0 0 1</matrix>
+        <translate sid="location">0 0 0.3412494</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 0</rotate>
+        <scale sid="scale">1 1 1</scale>
         <node id="Armature_Bone" name="Bone" sid="Bone" type="JOINT">
           <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 0 0 0 0 1</matrix>
           <node id="Armature_Bone_001" name="Bone.001" sid="Bone_001" type="JOINT">

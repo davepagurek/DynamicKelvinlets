@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include "ImpulseKelvinlet.h"
 
 glm::vec3 ImpulseKelvinlet::displacement(glm::vec3 position, Material material, float t) const {

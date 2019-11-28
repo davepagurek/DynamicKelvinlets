@@ -33,7 +33,7 @@ void ofApp::setup() {
     displacedMesh = make_shared<DisplacedMesh>(
         AnimatedMesh(loader, mass, kelvinletGenerator(displacedMesh),
                      AnimatedMesh::LoopType::DISCONTINUOUS),
-        Material(15, 0.45));
+        Material(10, 0.25));
   }
 
   displacedMesh->setup();

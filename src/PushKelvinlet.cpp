@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include "PushKelvinlet.h"
 
 glm::vec3 PushKelvinlet::displacement(glm::vec3 position, Material material, float t) const {
