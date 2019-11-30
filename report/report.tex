@@ -128,7 +128,7 @@
 
 Physically-based animations are widely used in computer graphics due to the realism of the resulting motion and their ease of use compared to manual animation of the same level of detail. However, physically-based simulations are computationally cumbersome due to the necessity of numerical solves and the accompanying stability conditions. There is additionally a  monotonous setup phase for artists employing such techniques, usually involving the generation of an appropriate volumetric mesh for the simulation. Hence, a simpler method to simulate secondary deformations would streamline the process of generating animations.
 
-In this paper, we implement Dynamic Kelvinlets \cite{DynamicKelvinlets}, which is an extension of elastostatic regularized Kelvinlets \cite{RegularizedKelvinlets}. The paper derives novel fundamental solutions of elastodynamics for spatially regularized and time-varying forces applied to an infinite continuum. The resulting wave-like deformations generated in the body are called \textit{Dynamic Kelvinlets}. This method has the following prime advantages over conventional physically-based simulation methods:
+Our goal is to provide a system through which artists can automatically add secondary motion to a standard keyframed animation using linear blend skinning bones. In this paper, we implement such a system based upon Dynamic Kelvinlets \cite{DynamicKelvinlets}, an extension of elastostatic regularized Kelvinlets \cite{RegularizedKelvinlets}. The paper proposing Dynamic Kelvinlets derives novel fundamental solutions of elastodynamics for spatially regularized and time-varying forces applied to an infinite continuum. This results in wave-like deformations through a medium. The method has the following prime advantages over conventional physically-based simulation methods:
 
 \begin{itemize}
   \item No geometric discretization is required
@@ -136,7 +136,7 @@ In this paper, we implement Dynamic Kelvinlets \cite{DynamicKelvinlets}, which i
   \item Displacement at a time $t_i$ does not depend on the previous time step $t_{i-1}$, so there are no stability conditions due to accumulated error over time
 \end{itemize}
 
-We implement the \textit{impulse Kelvinlet} and {push Kelvinlet} responses of an object, which correspond respectively to the responses to Dirac delta function and Heaviside function force distributions over time. The results show that this technique can generate visually accurate secondary motion in real-time. The technique is specifically suited to scenarios involving jiggling, denting, ripples, and blasts.
+We implement the \textit{impulse Kelvinlet} and \textit{push Kelvinlet} responses of an object, which correspond respectively to the responses to Dirac delta function and Heaviside function force distributions over time. We use the accelerations of vertices in the input keyframes to generate Kelvinlets. We then examine how this technique can generate visually accurate secondary motion in real-time. The technique is specifically suited to scenarios involving jiggling, denting, ripples, and blasts.
 
 
 \section{Method}
@@ -153,7 +153,14 @@ Our implementation \cite{Github} is written in C++ using the OpenFrameworks libr
 
 \subsection{Automatic Secondary Motion}
 
-TODO
+Given the ability to simulate the response of a mesh to a Kelvinlet force, we then need a way to generate these forces automatically from an input animation. Each frame, our system follows four steps:
+
+\begin{itemize}
+  \item For each vertex $X$ in the mesh, we find its location $x$ for the current frame using the transformation $\phi(X)$ from the frame's bone positions.
+  \item We approximate $\ddot{x}$ for all vertices using their locations from the past two frames of animation.
+  \item A Kelvinlet is generated for each $x$ given its corresponding $\ddot{x}$a.
+  \item We iteratively merge Kelvinlets from TODO
+\end{itemize}
 
 \section{Results}
 
