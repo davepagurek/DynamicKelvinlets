@@ -138,29 +138,64 @@ Our goal is to provide a system through which artists can automatically add seco
 
 We implement the \textit{impulse Kelvinlet} and \textit{push Kelvinlet} responses of an object, which correspond respectively to the responses to Dirac delta function and Heaviside function force distributions over time. We use the accelerations of vertices in the input keyframes to generate Kelvinlets. We then examine how this technique can generate visually accurate secondary motion in real-time. The technique is specifically suited to scenarios involving jiggling, denting, ripples, and blasts.
 
+\section{Background}
+
+Deformation of an infinite 3D medium formed by an isotropic and homogeneous elastic material are considered in the Dynamic Kelvinlets paper. Fundamental solutions are derived for the linear elasticity equation, where $b$ is a time-varying external body force, $m$ is the mass density, $\mu$ is the elastic shear modulus indicating the material stiffness, and $v$ is the Poisson ratio that controls the material compressibility:
+$$m\partial_{tt}u=\mu\Delta \frac{u}{1-2v}\nabla\left(\nabla\cdot u\right)+b$$
+
+The regularization of the Kelvinlet force produces a density function $\rho$ based on the amount of regularization $\epsilon$ and the radius $r$ away from the force centre:
+$$\rho(r) = \frac{15\epsilon^4}{8\pi(r^2 + \epsilon^2)^{7/2}}$$
+
+Plots of different amounts of regularization are shown in Figure~\ref{fig:Regularization}. Regardless of the value of $\epsilon$, the total amount of force applied to the continuum is preserved:
+$$\iiint_{\mathbb{R}^3} \rho\left(\sqrt{x^2 + y^2 + z^2}\right) dx\,dy\,dz = 1$$
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\linewidth]{img/regularizations.png}
+  \caption{Force density functions using different amounts of regularization.}
+  \label{fig:Regularization}
+\end{figure}
+
+We chose to implement these fundamental solutions for impulse and push response on a body. The force for an impulse is modeled as a regularized Dirac $\delta(t)$ function while the force for push is modeled as a Heaviside function $H(t)$.
 
 \section{Method}
 
 \subsection{Framework}
-
-Deformation of an infinite 3D medium formed by an isotropic and homogeneous elastic material are considered in the paper. Fundamental solutions are derived for the linear elasticity equation, where $b$ is a time-varying external body force, $m$ is the mass density, $\mu$ is the elastic shear modulus indicating the material stiffness, and $v$ is the Poisson ratio that controls the material compressibility:
-
-$$m\partial_{tt}u=\mu\Delta \frac{u}{1-2v}\nabla\left(\nabla\cdot u\right)+b$$
-
-We implement the fundamental solutions for impulse and push response on a body. The force for an impulse is modeled as a regularized Dirac $\delta(t)$ function while the force for push is modeled as a Heaviside function $H(t)$.
 
 Our implementation \cite{Github} is written in C++ using the OpenFrameworks library \cite{OpenFrameworks}, a wrapper for OpenGL that provides mesh data structures. Starting from an initial mesh, we apply an impulse or push force to it at a given location using our \texttt{DisplacedMesh} class, which is responsible for simulating and displaying the result. It implements the solution to the linear elastodynamics equation in C++ for calculation on the CPU. Additionally, since the displacement for each vertex has no dependence on the displacement of any other vertex, the calculation is also implemented as a step in the vertex shader on the GPU. In both cases, it produces offsets for the original mesh vertices given their initial locations and the elapsed time. These offsetted vertices are then passed through the rest of the OpenGL pipeline to be rendered to the screen.
 
 \subsection{Automatic Secondary Motion}
 
 Given the ability to simulate the response of a mesh to a Kelvinlet force, we then need a way to generate these forces automatically from an input animation. Each frame, our system follows four steps:
-
 \begin{itemize}
-  \item For each vertex $X$ in the mesh, we find its location $x$ for the current frame using the transformation $\phi(X)$ from the frame's bone positions.
-  \item We approximate $\ddot{x}$ for all vertices using their locations from the past two frames of animation.
-  \item A Kelvinlet is generated for each $x$ given its corresponding $\ddot{x}$a.
-  \item We iteratively merge Kelvinlets from TODO
+  \item For each vertex $X$ in the mesh, find its location $x$ for the current frame using the transformation $\phi(X)$ from the frame's bone positions.
+  \item Approximate $\ddot{x}$ for all vertices using their locations from the past two frames of animation.
+  \item Generate a Kelvinlet for each $x$ given its corresponding $\ddot{x}$a.
+  \item Iteratively merge Kelvinlets that plausibly would have resulted from a single source impulse.
 \end{itemize}
+When generating initial per-vertex Kelvinlets, we refer to the definition of force $F = m\ddot{x}$ to obtain a direction and magnitude for the impulse force vector. We approximate that the user-provided mass of a mesh is evenly distributed across its vertices when picking a value for $m$. We pick a level of regularization $\epsilon$ such that there is a force of exactly $F$ at the location of the vertex:
+$$\begin{aligned}
+  \rho(0) &= F\\
+  F \frac{15\epsilon^4}{8\pi(0^2 + \epsilon^2)^{7/2}} &= F\\
+  \epsilon &= \left(\frac{15}{8\pi}-1\right)^{4/7}\\
+  \epsilon &\approx 0.8\\
+\end{aligned}$$
+
+We then merge Kelvinlets. We only want to merge them if they are nearby and have near parallel force vectors. To check for closeness, we compute an approximate radius of the Kelvinlet's influence, only allowing Kelvinlets to merge if there is an intersection between the spheres produced by these radii. We pick the radius at which force magnitude drops to a low value (we use 0.1):
+$$\begin{aligned}
+  \left\Vert F\rho(r) \right\Vert &= 0.1\\
+  \frac{15 \epsilon^4 \Vert F \Vert}{8\pi \left(r^2 + \epsilon^2\right)^{7/2}} &= 0.1\\
+  r &= \sqrt{\left(\frac{15\epsilon^4 \Vert F \Vert}{0.1 \cdot 8\pi}\right)^{2/7} - \epsilon^2}
+\end{aligned}$$
+
+We additionally enforce Kelvinlet alignment by only allowing them to merge when $\hat{F}_1 \cdot \hat{F}_2 > 0.5$. If these conditions are met, then we compute the properties of the merged Kelvinlet. We aim to preserve the total amount of force, and since the space integral of regularized force varies only based on the scale of the force applied at the centre, this constrains the combined force magnitude. We make combined force direction a linear combination of the input force directions, weighted by the total amount of force in each. We use a similar linear combination to produce the new force centre $x'$. TODO talk about regularization This gives us:
+$$\begin{aligned}
+  \Vert F' \Vert &= \Vert F_1 \Vert + \Vert F_2 \Vert\\
+  \hat{F}' &= \frac{\Vert F_1 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\hat{F}_1 + \frac{\Vert F_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\hat{F}_2\\
+  x' &= \frac{\Vert F_1 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}x_1 + \frac{\Vert F_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}x_2\\
+  \epsilon' &= \frac{\Vert F_1 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\epsilon_1 + \frac{\Vert F_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\epsilon_2 +
+  \frac{\min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\}}{\Vert F_1 \Vert + \Vert F_2 \Vert} \Vert x_1 - x_2 \Vert\\
+\end{aligned}$$
 
 \section{Results}
 

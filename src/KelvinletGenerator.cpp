@@ -34,13 +34,13 @@ KelvinletGenerator kelvinletGenerator(const shared_ptr<DisplacedMesh>& displaced
             // Combine kelvinlets
             float magA = glm::length(a->force);
             float magB = glm::length(b->force);
-            float areaA = 2*magA/(M_PI * a->scale*a->scale);
-            float areaB = 2*magB/(M_PI * b->scale*b->scale);
-            float newScale = (a->scale*areaA + b->scale*areaB + stretchAmount*min(areaA, areaB)*glm::distance(a->center, b->center))/(areaA + areaB);
-            float newMag = newScale*newScale * (magA/(a->scale*a->scale) + magB/(b->scale*b->scale)); // Preserves total area
+            float volumeA = magA;
+            float volumeB = magB;
+            float newScale = (a->scale*volumeA + b->scale*volumeB + stretchAmount*min(volumeA, volumeB)*glm::distance(a->center, b->center))/(volumeA + volumeB);
+            float newMag = magA + magB; // Preserves total volume
             a->scale = newScale;
-            a->force = glm::normalize(areaA*a->force + areaB*b->force) * newScale;
-            a->center = (areaA*a->center + areaB*b->center)/(areaA + areaB);
+            a->force = glm::normalize(volumeA*a->force + volumeB*b->force) * newScale;
+            a->center = (volumeA*a->center + volumeB*b->center)/(volumeA + volumeB);
             b = potentialKelvinlets.erase(b);
           } else {
             ++b;
