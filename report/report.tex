@@ -188,14 +188,15 @@ $$\begin{aligned}
   r &= \sqrt{\left(\frac{15\epsilon^4 \Vert F \Vert}{0.1 \cdot 8\pi}\right)^{2/7} - \epsilon^2}
 \end{aligned}$$
 
-We additionally enforce Kelvinlet alignment by only allowing them to merge when $\hat{F}_1 \cdot \hat{F}_2 > 0.5$. If these conditions are met, then we compute the properties of the merged Kelvinlet. We aim to preserve the total amount of force, and since the space integral of regularized force varies only based on the scale of the force applied at the centre, this constrains the combined force magnitude. We make combined force direction a linear combination of the input force directions, weighted by the total amount of force in each. We use a similar linear combination to produce the new force centre $x'$. TODO talk about regularization This gives us:
+We additionally enforce Kelvinlet alignment by only allowing them to merge when $\hat{F}_1 \cdot \hat{F}_2 > 0.5$. If these conditions are met, then we compute the properties of the merged Kelvinlet. We aim to preserve the total amount of force, and since the space integral of regularized force varies only based on the scale of the force applied at the centre, this constrains the combined force magnitude. We make combined force direction a linear combination of the input force directions, weighted by the total amount of force in each. We use a similar linear combination to produce the new force centre $x'$. This gives us:
 $$\begin{aligned}
   \Vert F' \Vert &= \Vert F_1 \Vert + \Vert F_2 \Vert\\
-  \hat{F}' &= \frac{\Vert F_1 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\hat{F}_1 + \frac{\Vert F_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\hat{F}_2\\
-  x' &= \frac{\Vert F_1 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}x_1 + \frac{\Vert F_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}x_2\\
-  \epsilon' &= \frac{\Vert F_1 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\epsilon_1 + \frac{\Vert F_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\epsilon_2 +
-  \frac{\min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\}}{\Vert F_1 \Vert + \Vert F_2 \Vert} \Vert x_1 - x_2 \Vert\\
+  \hat{F}' &= \frac{\Vert F_1 \Vert \hat{F}_1 + \Vert F_2 \Vert \hat{F}_2}{\Vert F_1 \Vert + \Vert F_2 \Vert}\\
+  x' &= \frac{\Vert F_1 \Vert x_1 + \Vert F_2 \Vert x_2}{\Vert F_1 \Vert + \Vert F_2 \Vert}\\
 \end{aligned}$$
+
+Finally, we also need to pick a level of regularization $\epsilon'$ for the combined Kelvinlet. Ideally, it should regularize more the farther away the two force centers are, allowing the influence of the Kelvinlet to spread out and reach both. This leads us to the following formula, which augments a linear combination with a distance term:
+$$\epsilon' = \frac{\Vert F_1 \Vert \epsilon_1 + \Vert F_2 \Vert \epsilon_2 + \min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\} \Vert x_1 - x_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}$$
 
 \section{Results}
 
