@@ -170,10 +170,13 @@ Given the ability to simulate the response of a mesh to a Kelvinlet force, we th
 \begin{itemize}
   \item For each vertex $X$ in the mesh, find its location $x$ for the current frame using the transformation $\phi(X)$ from the frame's bone positions.
   \item Approximate $\ddot{x}$ for all vertices using their locations from the past two frames of animation.
-  \item Generate a Kelvinlet for each $x$ given its corresponding $\ddot{x}$a.
+  \item Generate an impulse Kelvinlet for each $x$ given its corresponding $\ddot{x}$a.
   \item Iteratively merge Kelvinlets that plausibly would have resulted from a single source impulse.
 \end{itemize}
-When generating initial per-vertex Kelvinlets, we refer to the definition of force $F = m\ddot{x}$ to obtain a direction and magnitude for the impulse force vector. We approximate that the user-provided mass of a mesh is evenly distributed across its vertices when picking a value for $m$. We pick a level of regularization $\epsilon$ such that there is a force of exactly $F$ at the location of the vertex:
+
+The generation step creates one Kelvinlet per vertex. The iterative merging step is a performance optimization, reducing the number of new Kelvinlets added each frame to a more reasonable number. Impulse Kelvinlets may be removed once they have been simulated for a sufficient length of time, as their influence has likely reached a steady state. Our tests pick merging parameters to maintain a maximum of 100 Kelvinlets at a time.
+
+When generating initial per-vertex Kelvinlets, we refer to Newton's Second Law, $F = m\ddot{x}$, to obtain a direction and magnitude for the impulse force vector. We approximate that the user-provided mass of a mesh is evenly distributed across its vertices when picking a value for $m$. We pick a level of regularization $\epsilon$ such that there is a force of exactly $F$ at the location of the vertex:
 $$\begin{aligned}
   \rho(0) &= F\\
   F \frac{15\epsilon^4}{8\pi(0^2 + \epsilon^2)^{7/2}} &= F\\
@@ -232,6 +235,8 @@ Multiple versions of the Dynamic Kelvinlet system were implemented to assess how
 Table \ref{FrameRates} shows the resulting frame rate when our different implementations are run on a late-2015 Macbook Pro. Our CPU-based implementations use a single core, and the GPU-based implementation uses the device's onboard Intel Iris Graphics 6100 chip. The reduced-size Stanford Dragon \cite{Stanford} mesh is used, which has 5205 vertices. Two Kelvinlet forces, one push and one impulse, are active on the mesh. The simulation frame rate is capped at 60 frames per second due to the limitations of the platform.
 
 Even with 4 RK4 steps, the GPU-based implementation achieves significantly higher frame rates, nearly keeping up with the maximum platform refresh rate. This result supports the original paper's claim that the system can run in real time.
+
+We also tested performance with multiple Kelvinlets influencing the mesh, which happens in practice when automatically adding Kelvinlets to an animation. If too large a number of Kelvinlets are required, the shader will not compile, as only 1024 registers will reliably be present when compiling the shader \cite{OpenGLWiki}. In our implementation, we can support 203 Kelvinlets before, in conjunction with other uniforms required by the shader, this value is surpassed. Using an NVIDIA GeForce GTX 1660 GPU, a target frame rate of 60fps is maintained with 203 active Kelvinlets.
 
 \subsection{Simulation Quality}
 
