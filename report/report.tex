@@ -53,7 +53,7 @@
 %%
 %% The "title" command has an optional parameter,
 %% allowing the author to define a "short title" to be used in page headers.
-\title{Dynamic Kelvinlets}
+\title{Automatic Secondary Motion with Dynamic Kelvinlets}
 
 %%
 %% The "author" command and its associated commands are used to define
@@ -76,7 +76,7 @@
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-  \textit{Dynamic Kelvinlets} \cite{DynamicKelvinlets} model the time-varying elastic deformations of objects in response to input forces. Videos showing Dynamic Kelvinlets in action demonstrate how it adds an extra level of realism to animations by introducing a secondary motion. We implement a system using Dynamic Kelvinlet deformation to verify that it can achieve visually plausible secondary motion at real-time simulation rates. We then aim to automatically produce forces to add secondary motion to objects given skeletal animation keyframes for a model using linear blend skinning.
+  Dynamic Kelvinlets model the time-varying elastic deformations of objects in response to input forces. Videos showing Dynamic Kelvinlets in action demonstrate how it adds an extra level of realism to animations by introducing a secondary motion. We implement a system using Dynamic Kelvinlet deformation to automatically add secondary motion to objects given linear blend skinned skeletal animation keyframes of primary motion for a model.
 \end{abstract}
 
 %%
@@ -118,6 +118,12 @@
 %% the work being presented. Separate the keywords with commas.
 %\keywords{datasets, neural networks, gaze detection, text tagging}
 
+\begin{teaserfigure}
+  \centering
+  \includegraphics[width=\linewidth]{img/jump.png}
+  \caption{Frames of deformations due to generated Kelvinlet forces superimposed over primary motion frames.}
+  \label{fig:Jump}
+\end{teaserfigure}
 
 %%
 %% This command processes the author and affiliation and title
@@ -128,7 +134,7 @@
 
 Physically-based animations are widely used in computer graphics due to the realism of the resulting motion and their ease of use compared to manual animation of the same level of detail. However, physically-based simulations are computationally cumbersome due to the necessity of numerical solves and the accompanying stability conditions. There is additionally a  monotonous setup phase for artists employing such techniques, usually involving the generation of an appropriate volumetric mesh for the simulation. Hence, a simpler method to simulate secondary deformations would streamline the process of generating animations.
 
-Our goal is to provide a system through which artists can automatically add secondary motion to a standard keyframed animation using linear blend skinning bones. In this paper, we implement such a system based upon Dynamic Kelvinlets \cite{DynamicKelvinlets}, an extension of elastostatic regularized Kelvinlets \cite{RegularizedKelvinlets}. The paper proposing Dynamic Kelvinlets derives novel fundamental solutions of elastodynamics for spatially regularized and time-varying forces applied to an infinite continuum. This results in wave-like deformations through a medium. The method has the following prime advantages over conventional physically-based simulation methods:
+Our goal is to provide a system through which artists can automatically add secondary motion to a standard keyframed animation using linear blend skinning bones. In this paper, we implement such a system based upon \textit{Dynamic Kelvinlets} \cite{DynamicKelvinlets}, an extension of elastostatic regularized Kelvinlets \cite{RegularizedKelvinlets}. The paper proposing Dynamic Kelvinlets derives novel fundamental solutions of elastodynamics for spatially regularized and time-varying forces applied to an infinite continuum. This results in wave-like deformations through a medium. The method has the following prime advantages over conventional physically-based simulation methods:
 
 \begin{itemize}
   \item No geometric discretization is required
@@ -261,13 +267,30 @@ Another point of note is that the input to Dynamic Kelvinlets includes the mater
 
 A final note is that the Bullet simulation ran at around 19 frames per second on the CPU. This type of simulation has the capability of achieving decent performance, but its ability to parallelize further is limited due to information dependencies in steps of the simulation algorithm.
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\linewidth]{img/frames.png}
+  \caption{Frames from linear blend skinned animations with frames of Kelvinlet-induced deformation motion superimposed.}
+  \label{fig:Frames}
+\end{figure*}
+
 \subsection{Secondary Motion Quality}
 
-TODO
+To analyze the quality of the generated Kelvinlet-based secondary motion, we produced a number models with linear blend skinned primary animation. These models and animations were passed through our system to produce real time output. To illustrate the effect of the generated Kelvinlets on the meshes, some frames are shown in Figures \ref{fig:Jump} and \ref{fig:Frames}. The resulting animations themselves can be viewed in our implementation on Github \cite{Github}.
+
+It is first important to clarify what ``primary motion'' entails here. By analogy to other aspects of computer graphics, secondary motion is to primary motion as texture is to geometry. In John Lasseter's paper describing the 12 Principles of Animation \cite{Lasseter}, secondary motion is ``the action of an object resulting from another action.'' Secondary motion is necessarily smaller than and subordinate to primary motion because its role in storytelling is to add depth and realism and not to take focus away from the acting, which is done by the primary motion. Lasseter states that if secondary motion ``conflicts, becomes more interesting, or dominates in any way, it is either the wrong choice or is staged improperly.'' Larger actions that are arguably still the result of another action are likely not secondary motion and instead fall into the definition of \textit{follow through:} the termination of an action. Segments of a character that are attached to the part leading movement will ``move at a  slower speed and `drag' behind the leading part of the figure,'' continuing to move after the leading part has stopped. In our system, this is considered part of primary motion and must be manually animated in the linear blend skin keyframes.
+
+As noted when discussing the Bullet physics simulation, Kelvinlets on their own do not produce oscillations. While this is a technical limitation of Kelvinlets, the addition of large-scale oscillation where none is present in the input is likely not desired by animators. The oscillation of bones in character animation typically is the result of follow through action as leading bones slow down and stop, causing following bones to overshoot and bounce back. Being part of primary motion, this is something we expect animators would want control over and would prefer to specify in the input. The secondary motion we produce instead takes the form of small waves and ripples travelling through the mesh.
+
+We find that our generated secondary motion is quite plausible for dramatic movements. In such inputs, the likelihood that any given part of the mesh surface will be undergoing some type of secondary motion deformation is likely. This masks the fact that Kelvinlet waves travel through empty space, so the continuum assumption does not produce any distracting artifacts. For subtler movements such as a walk cycle, artifacts from the continuum assumption become more noticeable, especially when material properties are chosen that exaggerate the squash and stretch.
 
 \section{Future Work}
 
-TODO
+The largest issues with our system come from the continuum assumption made by Kelvinlets. This can potentially be overcome by discretizing the mesh into segments through which waves can propagate freely without travelling through space unrealistically. With each segment simulated with their own separate sets of Kelvinlets, no waves would be found travelling through empty space. Boundary conditions would need to be addressed by adding Kelvinlets to neighbouring segments as waves reach segment intersections.
+
+Our current system assumes that the mass of a mesh is equal to the user-provided mass of the whole mesh divided evenly across its vertices. This firstly assumes that vertex density in the mesh is propoertional to mesh mass, which may not be true. Secondly, this makes the assumption that the mass of the mesh is spread across its surface, which also may not always mirror reality, where the movement on the surface is a result of the movement throughout the volume. A mechanism to allow for correction of both issues would be to specify the effective mass of a vertex as an additional vertex attribute, possibly through UV mapping. This allows mass to be easily redistributed. It does not on its own account for the volume beneath the mesh surface, but it would provide a mechanism to allow an artist to increase or decrease the effective mass at a vertex to more closely match the intended material properties.
+
+It should also be mentioned that the system does not take into account undeformed objects. A deformed object may end up clipping through other objects in a scene, if any are present. Future work can be done to attempt to address this issue in a way that does not prevent efficient implementation of the GPU.
 
 %%
 %% The next two lines define the bibliography style to be used, and
