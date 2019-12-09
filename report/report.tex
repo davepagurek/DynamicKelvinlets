@@ -53,7 +53,7 @@
 %%
 %% The "title" command has an optional parameter,
 %% allowing the author to define a "short title" to be used in page headers.
-\title{Dynamic Kelvinlets}
+\title{Automatic Secondary Motion with Dynamic Kelvinlets}
 
 %%
 %% The "author" command and its associated commands are used to define
@@ -76,7 +76,7 @@
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-  \textit{Dynamic Kelvinlets} \cite{DynamicKelvinlets} model the time-varying elastic deformations of objects in response to input forces. Videos showing Dynamic Kelvinlets in action demonstrate how it adds an extra level of realism to animations by introducing a secondary motion. We implement a system using Dynamic Kelvinlet deformation to verify that it can achieve visually plausible secondary motion at real-time simulation rates. We then aim to automatically produce forces to add secondary motion to objects given skeletal animation keyframes for a model using linear blend skinning.
+  Dynamic Kelvinlets model the time-varying elastic deformations of objects in response to input forces. Videos showing Dynamic Kelvinlets in action demonstrate how it adds an extra level of realism to animations by introducing a secondary motion. We implement a system using Dynamic Kelvinlet deformation to automatically add secondary motion to objects given linear blend skinned skeletal animation keyframes of primary motion for a model.
 \end{abstract}
 
 %%
@@ -118,6 +118,12 @@
 %% the work being presented. Separate the keywords with commas.
 %\keywords{datasets, neural networks, gaze detection, text tagging}
 
+\begin{teaserfigure}
+  \centering
+  \includegraphics[width=\linewidth]{img/jump.png}
+  \caption{Frames of deformations due to generated Kelvinlet forces superimposed over primary motion frames.}
+  \label{fig:Jump}
+\end{teaserfigure}
 
 %%
 %% This command processes the author and affiliation and title
@@ -128,7 +134,7 @@
 
 Physically-based animations are widely used in computer graphics due to the realism of the resulting motion and their ease of use compared to manual animation of the same level of detail. However, physically-based simulations are computationally cumbersome due to the necessity of numerical solves and the accompanying stability conditions. There is additionally a  monotonous setup phase for artists employing such techniques, usually involving the generation of an appropriate volumetric mesh for the simulation. Hence, a simpler method to simulate secondary deformations would streamline the process of generating animations.
 
-Our goal is to provide a system through which artists can automatically add secondary motion to a standard keyframed animation using linear blend skinning bones. In this paper, we implement such a system based upon Dynamic Kelvinlets \cite{DynamicKelvinlets}, an extension of elastostatic regularized Kelvinlets \cite{RegularizedKelvinlets}. The paper proposing Dynamic Kelvinlets derives novel fundamental solutions of elastodynamics for spatially regularized and time-varying forces applied to an infinite continuum. This results in wave-like deformations through a medium. The method has the following prime advantages over conventional physically-based simulation methods:
+Our goal is to provide a system through which artists can automatically add secondary motion to a standard keyframed animation using linear blend skinning bones. In this paper, we implement such a system based upon \textit{Dynamic Kelvinlets} \cite{DynamicKelvinlets}, an extension of elastostatic regularized Kelvinlets \cite{RegularizedKelvinlets}. The paper proposing Dynamic Kelvinlets derives novel fundamental solutions of elastodynamics for spatially regularized and time-varying forces applied to an infinite continuum. This results in wave-like deformations through a medium. The method has the following prime advantages over conventional physically-based simulation methods:
 
 \begin{itemize}
   \item No geometric discretization is required
@@ -170,10 +176,13 @@ Given the ability to simulate the response of a mesh to a Kelvinlet force, we th
 \begin{itemize}
   \item For each vertex $X$ in the mesh, find its location $x$ for the current frame using the transformation $\phi(X)$ from the frame's bone positions.
   \item Approximate $\ddot{x}$ for all vertices using their locations from the past two frames of animation.
-  \item Generate a Kelvinlet for each $x$ given its corresponding $\ddot{x}$a.
+  \item Generate an impulse Kelvinlet for each $x$ given its corresponding $\ddot{x}$a.
   \item Iteratively merge Kelvinlets that plausibly would have resulted from a single source impulse.
 \end{itemize}
-When generating initial per-vertex Kelvinlets, we refer to the definition of force $F = m\ddot{x}$ to obtain a direction and magnitude for the impulse force vector. We approximate that the user-provided mass of a mesh is evenly distributed across its vertices when picking a value for $m$. We pick a level of regularization $\epsilon$ such that there is a force of exactly $F$ at the location of the vertex:
+
+The generation step creates one Kelvinlet per vertex. The iterative merging step is a performance optimization, reducing the number of new Kelvinlets added each frame to a more reasonable number. Impulse Kelvinlets may be removed once they have been simulated for a sufficient length of time, as their influence has likely reached a steady state. Our tests pick merging parameters to maintain a maximum of 100 Kelvinlets at a time.
+
+When generating initial per-vertex Kelvinlets, we refer to Newton's Second Law, $F = m\ddot{x}$, to obtain a direction and magnitude for the impulse force vector. We approximate that the user-provided mass of a mesh is evenly distributed across its vertices when picking a value for $m$. We pick a level of regularization $\epsilon$ such that there is a force of exactly $F$ at the location of the vertex:
 $$\begin{aligned}
   \rho(0) &= F\\
   F \frac{15\epsilon^4}{8\pi(0^2 + \epsilon^2)^{7/2}} &= F\\
@@ -188,14 +197,15 @@ $$\begin{aligned}
   r &= \sqrt{\left(\frac{15\epsilon^4 \Vert F \Vert}{0.1 \cdot 8\pi}\right)^{2/7} - \epsilon^2}
 \end{aligned}$$
 
-We additionally enforce Kelvinlet alignment by only allowing them to merge when $\hat{F}_1 \cdot \hat{F}_2 > 0.5$. If these conditions are met, then we compute the properties of the merged Kelvinlet. We aim to preserve the total amount of force, and since the space integral of regularized force varies only based on the scale of the force applied at the centre, this constrains the combined force magnitude. We make combined force direction a linear combination of the input force directions, weighted by the total amount of force in each. We use a similar linear combination to produce the new force centre $x'$. TODO talk about regularization This gives us:
+We additionally enforce Kelvinlet alignment by only allowing them to merge when $\hat{F}_1 \cdot \hat{F}_2 > 0.5$. If these conditions are met, then we compute the properties of the merged Kelvinlet. We aim to preserve the total amount of force, and since the space integral of regularized force varies only based on the scale of the force applied at the centre, this constrains the combined force magnitude. We make combined force direction a linear combination of the input force directions, weighted by the total amount of force in each. We use a similar linear combination to produce the new force centre $x'$. This gives us:
 $$\begin{aligned}
   \Vert F' \Vert &= \Vert F_1 \Vert + \Vert F_2 \Vert\\
-  \hat{F}' &= \frac{\Vert F_1 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\hat{F}_1 + \frac{\Vert F_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\hat{F}_2\\
-  x' &= \frac{\Vert F_1 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}x_1 + \frac{\Vert F_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}x_2\\
-  \epsilon' &= \frac{\Vert F_1 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\epsilon_1 + \frac{\Vert F_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}\epsilon_2 +
-  \frac{\min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\}}{\Vert F_1 \Vert + \Vert F_2 \Vert} \Vert x_1 - x_2 \Vert\\
+  \hat{F}' &= \frac{\Vert F_1 \Vert \hat{F}_1 + \Vert F_2 \Vert \hat{F}_2}{\Vert F_1 \Vert + \Vert F_2 \Vert}\\
+  x' &= \frac{\Vert F_1 \Vert x_1 + \Vert F_2 \Vert x_2}{\Vert F_1 \Vert + \Vert F_2 \Vert}\\
 \end{aligned}$$
+
+Finally, we also need to pick a level of regularization $\epsilon'$ for the combined Kelvinlet. Ideally, it should regularize more the farther away the two force centers are, allowing the influence of the Kelvinlet to spread out and reach both. This leads us to the following formula, which augments a linear combination with a distance term:
+$$\epsilon' = \frac{\Vert F_1 \Vert \epsilon_1 + \Vert F_2 \Vert \epsilon_2 + \min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\} \Vert x_1 - x_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}$$
 
 \section{Results}
 
@@ -232,6 +242,8 @@ Table \ref{FrameRates} shows the resulting frame rate when our different impleme
 
 Even with 4 RK4 steps, the GPU-based implementation achieves significantly higher frame rates, nearly keeping up with the maximum platform refresh rate. This result supports the original paper's claim that the system can run in real time.
 
+We also tested performance with multiple Kelvinlets influencing the mesh, which happens in practice when automatically adding Kelvinlets to an animation. If too large a number of Kelvinlets are required, the shader will not compile, as only 1024 registers will reliably be present when compiling the shader \cite{OpenGLWiki}. In our implementation, we can support 203 Kelvinlets before, in conjunction with other uniforms required by the shader, this value is surpassed. Using an NVIDIA GeForce GTX 1660 GPU, a target frame rate of 60fps is maintained with 203 active Kelvinlets.
+
 \subsection{Simulation Quality}
 
 Although Dynamic Kelvinlets use physics to compute displacements over a field, real meshes are not infinite fields: they have boundaries and are not connected by an invisible, uniform continuum. To assess how plausible results look despite this assumption, we compare Kelvinlet forces applied to a continuum with a more traditional physics simulation of the application of a roughly equivalent force on a deformable body without this assumption.
@@ -255,13 +267,30 @@ Another point of note is that the input to Dynamic Kelvinlets includes the mater
 
 A final note is that the Bullet simulation ran at around 19 frames per second on the CPU. This type of simulation has the capability of achieving decent performance, but its ability to parallelize further is limited due to information dependencies in steps of the simulation algorithm.
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\linewidth]{img/frames.png}
+  \caption{Frames from linear blend skinned animations with frames of Kelvinlet-induced deformation motion superimposed.}
+  \label{fig:Frames}
+\end{figure*}
+
 \subsection{Secondary Motion Quality}
 
-TODO
+To analyze the quality of the generated Kelvinlet-based secondary motion, we produced a number models with linear blend skinned primary animation. These models and animations were passed through our system to produce real time output. To illustrate the effect of the generated Kelvinlets on the meshes, some frames are shown in Figures \ref{fig:Jump} and \ref{fig:Frames}. The resulting animations themselves can be viewed in our implementation on Github \cite{Github}.
+
+It is first important to clarify what ``primary motion'' entails here. By analogy to other aspects of computer graphics, secondary motion is to primary motion as texture is to geometry. In John Lasseter's paper describing the 12 Principles of Animation \cite{Lasseter}, secondary motion is ``the action of an object resulting from another action.'' Secondary motion is necessarily smaller than and subordinate to primary motion because its role in storytelling is to add depth and realism and not to take focus away from the acting, which is done by the primary motion. Lasseter states that if secondary motion ``conflicts, becomes more interesting, or dominates in any way, it is either the wrong choice or is staged improperly.'' Larger actions that are arguably still the result of another action are likely not secondary motion and instead fall into the definition of \textit{follow through:} the termination of an action. Segments of a character that are attached to the part leading movement will ``move at a  slower speed and `drag' behind the leading part of the figure,'' continuing to move after the leading part has stopped. In our system, this is considered part of primary motion and must be manually animated in the linear blend skin keyframes.
+
+As noted when discussing the Bullet physics simulation, Kelvinlets on their own do not produce oscillations. While this is a technical limitation of Kelvinlets, the addition of large-scale oscillation where none is present in the input is likely not desired by animators. The oscillation of bones in character animation typically is the result of follow through action as leading bones slow down and stop, causing following bones to overshoot and bounce back. Being part of primary motion, this is something we expect animators would want control over and would prefer to specify in the input. The secondary motion we produce instead takes the form of small waves and ripples travelling through the mesh.
+
+We find that our generated secondary motion is quite plausible for dramatic movements. In such inputs, the likelihood that any given part of the mesh surface will be undergoing some type of secondary motion deformation is likely. This masks the fact that Kelvinlet waves travel through empty space, so the continuum assumption does not produce any distracting artifacts. For subtler movements such as a walk cycle, artifacts from the continuum assumption become more noticeable, especially when material properties are chosen that exaggerate the squash and stretch.
 
 \section{Future Work}
 
-TODO
+The largest issues with our system come from the continuum assumption made by Kelvinlets. This can potentially be overcome by discretizing the mesh into segments through which waves can propagate freely without travelling through space unrealistically. With each segment simulated with their own separate sets of Kelvinlets, no waves would be found travelling through empty space. Boundary conditions would need to be addressed by adding Kelvinlets to neighbouring segments as waves reach segment intersections.
+
+Our current system assumes that the mass of a mesh is equal to the user-provided mass of the whole mesh divided evenly across its vertices. This firstly assumes that vertex density in the mesh is propoertional to mesh mass, which may not be true. Secondly, this makes the assumption that the mass of the mesh is spread across its surface, which also may not always mirror reality, where the movement on the surface is a result of the movement throughout the volume. A mechanism to allow for correction of both issues would be to specify the effective mass of a vertex as an additional vertex attribute, possibly through UV mapping. This allows mass to be easily redistributed. It does not on its own account for the volume beneath the mesh surface, but it would provide a mechanism to allow an artist to increase or decrease the effective mass at a vertex to more closely match the intended material properties.
+
+It should also be mentioned that the system does not take into account undeformed objects. A deformed object may end up clipping through other objects in a scene, if any are present. Future work can be done to attempt to address this issue in a way that does not prevent efficient implementation of the GPU.
 
 %%
 %% The next two lines define the bibliography style to be used, and
