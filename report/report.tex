@@ -4,6 +4,10 @@
 \let\@authorsaddresses\@empty
 \makeatother
 
+%% Algorithm
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -154,6 +158,7 @@ $$\iiint_{\mathbb{R}^3} \rho\left(\sqrt{x^2 + y^2 + z^2}\right) dx\,dy\,dz = 1$$
   \includegraphics[width=0.7\linewidth]{img/regularizations.png}
   \caption{Force density functions using different amounts of regularization.}
   \label{fig:Regularization}
+  \Description[regularized force]{regularized force}
 \end{figure}
 
 We chose to implement these fundamental solutions for impulse and push response on a body. The force for an impulse is modeled as a regularized Dirac $\delta(t)$ function while the force for push is modeled as a Heaviside function $H(t)$.
@@ -170,7 +175,7 @@ Given the ability to simulate the response of a mesh to a Kelvinlet force, we th
 \begin{itemize}
   \item For each vertex $X$ in the mesh, find its location $x$ for the current frame using the transformation $\phi(X)$ from the frame's bone positions.
   \item Approximate $\ddot{x}$ for all vertices using their locations from the past two frames of animation.
-  \item Generate an impulse Kelvinlet for each $x$ given its corresponding $\ddot{x}$a.
+  \item Generate an impulse Kelvinlet for each $x$ given its corresponding $\ddot{x}$.
   \item Iteratively merge Kelvinlets that plausibly would have resulted from a single source impulse.
 \end{itemize}
 
@@ -213,7 +218,40 @@ One of the benefits of Dynamic Kelvinlet based motion is that there is a closed-
   \includegraphics[width=0.7\linewidth]{img/precision-error-40.png}
   \caption{Catastrophic precision error around the impulse centre.}
   \label{fig:Catastrophic}
+  \Description[catastrophic precision error]{overshoot because of catastrophic precision error}
 \end{figure}
+
+\begin{algorithm}[hbt!]
+\caption{Overall Mesh Generation algorithm}\label{alg:euclid}
+\begin{algorithmic}[1]
+\Procedure{KelvinletGenerator::generate}{$\mathit{Mesh \: \&M}$}
+\State $v_i \gets M$ \Comment{\textit{get current vertex locations}}
+\State $a_i \gets A$ \Comment{\textit{get accelerations from animated mesh $A$}}
+\State $\mathit{list<kelvinlet> potentialKelvinlets}$
+\For{ $ \text{v} \in A$}\Comment{for all vertices v in $A$}
+\State $\mathit{kelvinlet_i} \gets a_i$
+\State $\mathit{potentialKelvinlets.push\_back(kelvinlet_i)}$
+\EndFor
+\For{$\mathit{k1 \in potentialKelvinlets}$}
+\For{$k2 \in potentialKelvinlets$}
+\If{ $\mathit{distance(k1,k2) < threshold1 \: \& \: angle(k1,k2)} < threshold2$}
+\EndIf
+\State $\mathit{combine(k1,k2)}$
+\EndFor
+\EndFor
+\EndProcedure
+\Procedure{AnimatedMesh::update}{$\mathit{float \: \&time}$}
+\State $A_{t-2}, \: A_{t-1}, \: A_{t} \gets \mathit{animationLoader}$\Comment{get keyframes}
+\State $v_{t-2}, \: v_{t-1}, \: v_{t} \gets A_{t-2}, \: A_{t-1}, \: A_{t} $\Comment{get vertex locations}
+\State $a_{t-2}, \: a_{t-1}, \: a_{t} \gets A_{t-2}, \: A_{t-1}, \: A_{t} $ \Comment{calculate accelerations}
+\State $\mathit {Mesh \: M\gets v, a}$\Comment{create displaced mesh from vertex locations and accelerations}
+\State $\textsc{generate}(M)$\Comment{generate kelvinlets for the mesh}
+\State $\mathit{display(M)}$\Comment{display update mesh using OpenFrameWorks}
+\EndProcedure
+\end{algorithmic}
+\label{algo}
+\end{algorithm}
+
 
 \subsection{Performance}
 
