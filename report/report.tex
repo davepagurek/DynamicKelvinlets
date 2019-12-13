@@ -185,6 +185,8 @@ Given the ability to simulate the response of a mesh to a Kelvinlet force, we th
   \item Iteratively merge Kelvinlets that plausibly would have resulted from a single source impulse.
 \end{itemize}
 
+The algorithm is described at a high level in Algorithm \ref{alg:Generation}.
+
 The generation step creates one Kelvinlet per vertex. The iterative merging step is a performance optimization, reducing the number of new Kelvinlets added each frame to a more reasonable number. Impulse Kelvinlets may be removed once they have been simulated for a sufficient length of time, as their influence has likely reached a steady state. Our tests pick merging parameters to maintain a maximum of 100 Kelvinlets at a time.
 
 When generating initial per-vertex Kelvinlets, we refer to Newton's Second Law, $F = m\ddot{x}$, to obtain a direction and magnitude for the impulse force vector. We approximate that the user-provided mass of a mesh is evenly distributed across its vertices when picking a value for $m$. We pick a level of regularization $\epsilon$ such that there is a force of exactly $F$ at the location of the vertex:
@@ -228,7 +230,7 @@ One of the benefits of Dynamic Kelvinlet based motion is that there is a closed-
 \end{figure}
 
 \begin{algorithm}[hbt!]
-\caption{Overall Mesh Generation algorithm}\label{alg:euclid}
+\caption{Overall secondary motion generation algorithm}\label{alg:Generation}
 \begin{algorithmic}[1]
 \Procedure{GenerateKelvinlets}{$M : \textit{Mesh}$}
 \State $X: [x_1, ..., x_n] \gets \textsc{GetVertexPositions}(M)$
