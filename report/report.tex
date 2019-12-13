@@ -230,29 +230,33 @@ One of the benefits of Dynamic Kelvinlet based motion is that there is a closed-
 \begin{algorithm}[hbt!]
 \caption{Overall Mesh Generation algorithm}\label{alg:euclid}
 \begin{algorithmic}[1]
-\Procedure{KelvinletGenerator::generate}{$\mathit{Mesh \: \&M}$}
-\State $v_i \gets M$ \Comment{\textit{get current vertex locations}}
-\State $a_i \gets A$ \Comment{\textit{get accelerations from animated mesh $A$}}
-\State $\mathit{list<kelvinlet> potentialKelvinlets}$
-\For{ $ \text{v} \in A$}\Comment{for all vertices v in $A$}
-\State $\mathit{kelvinlet_i} \gets a_i$
-\State $\mathit{potentialKelvinlets.push\_back(kelvinlet_i)}$
+\Procedure{GenerateKelvinlets}{$M : \textit{Mesh}$}
+\State $X: [x_1, ..., x_n] \gets \textsc{GetVertexPositions}(M)$
+\State $\ddot{X}: [\ddot{x}_1, ..., \ddot{x}_n] \gets \textsc{GetVertexAccelerations}(M)$
+\State $K \gets \{\}$ \Comment{\textit{Initialize set of new Kelvinlets}}
+\For{ $i \in \{1, ..., n\}$}\Comment{\textit{Add a Kelvinlet for each vertex}}
+\State $k_i \gets \textsc{MakeKelvinlet}(x_i, \ddot{x}_i)$
+\State $K \gets K \cup \{ k_i \}$
 \EndFor
-\For{$\mathit{k1 \in potentialKelvinlets}$}
-\For{$k2 \in potentialKelvinlets$}
-\If{ $\mathit{distance(k1,k2) < threshold1 \: \& \: angle(k1,k2)} < threshold2$}
-\EndIf
-\State $\mathit{combine(k1,k2)}$
+\State $P \gets \binom{K}{2}$ \Comment{\textit{Get pairs to possibly merge}}
+\For{$(k_a, k_b) \in P$}
+  \If{ $\textsc{dist}(k_a,k_b) < d_\text{max} \land \textsc{angle}(k_a,k_b) < a_\text{max}$}
+    \State $k' \gets \textsc{MergeKelvinlets}(k_a,k_b)$
+    \State $K \gets K \setminus \{k_a, k_b\}$ \Comment{\textit{Remove original Kelvinlets}}
+    \State $P \gets \{ P : (k_c, k_d) \mid k_c, k_d \in K \}$ \Comment{\textit{...and their pairs}}
+    \State $P \gets P \cup \{k'\} \times K$ \Comment{\textit{Add pairs with merge result}}
+    \State $K \gets K \cup \{k'\}$ \Comment{\textit{Add the merge result itself}}
+  \EndIf
 \EndFor
-\EndFor
+\Return $K$
 \EndProcedure
-\Procedure{AnimatedMesh::update}{$\mathit{float \: \&time}$}
-\State $A_{t-2}, \: A_{t-1}, \: A_{t} \gets \mathit{animationLoader}$\Comment{get keyframes}
-\State $v_{t-2}, \: v_{t-1}, \: v_{t} \gets A_{t-2}, \: A_{t-1}, \: A_{t} $\Comment{get vertex locations}
-\State $a_{t-2}, \: a_{t-1}, \: a_{t} \gets A_{t-2}, \: A_{t-1}, \: A_{t} $ \Comment{calculate accelerations}
-\State $\mathit {Mesh \: M\gets v, a}$\Comment{create displaced mesh from vertex locations and accelerations}
-\State $\textsc{generate}(M)$\Comment{generate kelvinlets for the mesh}
-\State $\mathit{display(M)}$\Comment{display update mesh using OpenFrameWorks}
+\Procedure{Update}{$T : \textit{Timeline}, \: t : \mathbb{N}$}
+\State $X_{t-2}, \: X_{t-1}, \: X_{t} \gets \textsc{GetVerticesAtTimes}(T, \{t-2, t-1, t\})$
+\State $\dot{X}_{t-1}, \: \dot{X}_{t} \gets X_{t-1}-X_{t-2}, \: X_t - X_{t-1}$
+\State $\ddot{X}_t \gets \dot{X}_t - \dot{X}_{t-1}$
+\State $M \gets \textsc{MeshWithAccelerations}(X_t, \ddot{X}_t)$
+\State $K_\text{all} \gets K_\text{all} \cup \textsc{GenerateKelvinlets}(M)$
+\State $\textsc{Display}(M, K_\text{all})$ \Comment{\textit{Display mesh using displacement shader}}
 \EndProcedure
 \end{algorithmic}
 \label{algo}
@@ -335,6 +339,15 @@ It should also be mentioned that the system does not take into account undeforme
 %% the bibliography file.
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{report}
+
+\appendix
+\section{Contributions}
+
+Dave set up the framework for the project in C++ and GLSL and implemented impulse Kelvinlets in both. He created an equivalent test case both in the Dynamic Kelvinlets project and in Blender using the Bullet physics simulator. He set up the pipeline to process animated meshes and generate Kelvinlets from them each frame. He investigated the behavior of regularized Kelvinlet forces and created formulas for approximating two Kelvinlets with a single Kelvinlet. He modeled, rigged, and animated the animated meshes used for tests in this report using Blender.
+
+Jasmeet implemented push Kelvinlets in C++, generalizing both types of Kelvinlets under a common interface. He later implemented push Kelvinlets in GLSL after profiling the C++ implementation to identify whether or not there were fixable bottlenecks. He added code to export image sequences and convert them to video files. When automatically generating secondary motion, he investigated the magnitude of the forces involved with common actions and experimented with the parameters in Kelvinlet generation to find ones that work reasonably for these actions.
+
+Conception of experiments and analysis of their results was a collaborative effort.
 
 \end{document}
 \endinput
