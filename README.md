@@ -4,7 +4,7 @@ Automatic addition of secondary motion to keyframed animation using [Dynamic Kel
 
 # Merging Dynamic Kelvinlets
 
-![Merging Dynamic Kelvinlents](https://raw.githubusercontent.com/davepagurek/DynamicKelvinlets/master/screenshots/merge.gif)
+![Merging Dynamic Kelvinlents](screenshots/merge.gif)
 
 ## Results
 
