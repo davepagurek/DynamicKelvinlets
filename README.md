@@ -2,6 +2,10 @@
 
 Automatic addition of secondary motion to keyframed animation using [Dynamic Kelvinlets](https://graphics.pixar.com/library/DynaKelvinlets/paper.pdf) (Fernando De Goes and Doug L. James).
 
+# Merging Dynamic Kelvinlets
+
+![Merging Dynamic Kelvinlents](https://raw.githubusercontent.com/davepagurek/DynamicKelvinlets/master/screenshots/merge.gif)
+
 ## Results
 
 ### Automatic Secondary Motion
