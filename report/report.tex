@@ -8,6 +8,9 @@
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 
+%% Subfigures
+\usepackage{subcaption}
+
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -154,7 +157,7 @@ We implement the \textit{impulse Kelvinlet} and \textit{push Kelvinlet} response
 Deformation of an infinite 3D medium formed by an isotropic and homogeneous elastic material are considered in the Dynamic Kelvinlets paper. Fundamental solutions are derived for the linear elasticity equation, where $b$ is a time-varying external body force, $m$ is the mass density, $\mu$ is the elastic shear modulus indicating the material stiffness, and $v$ is the Poisson ratio that controls the material compressibility:
 $$m\partial_{tt}u=\mu\Delta \frac{u}{1-2v}\nabla\left(\nabla\cdot u\right)+b$$
 
-This equation is also called the elastic wave equation as it resembles the wave equation. It has an additional divergence term that restricts large volume changes. The point of application of force acts as the source for the waves and they radiate in all directions towards infinity. Two kinds of waves are generated. The first is the pressure wave which represents the volume oscillation in space and time. It depends on both the Poisson ration and the elastic shear modulus. The pressure wave travels as a longitudinal wave in the medium. The second wave is the shear wave. It produces divergence free displacements in the transverse direction. This wave only depends on the shear modulus of the medium. The combined response of these two waves gives us the dynamic kelvinlet response to a force in 3D space.
+This equation is also called the elastic wave equation as it resembles the wave equation. It has an additional divergence term that restricts large volume changes. The point of application of force acts as the source for the waves and they radiate in all directions towards infinity. Two kinds of waves are generated. The first is the pressure wave which represents the volume oscillation in space and time. It depends on both the Poisson ration and the elastic shear modulus. The pressure wave travels as a longitudinal wave in the medium. The second wave is the shear wave. It produces divergence free displacements in the transverse direction. This wave only depends on the shear modulus of the medium. The combined response of these two waves gives us the material response to a regularized force in 3D space.
 
 The regularization of the Kelvinlet force produces a density function $\rho$ based on the amount of regularization $\epsilon$ and the radius $r$ away from the force centre:
 $$\rho(r) = \frac{15\epsilon^4}{8\pi(r^2 + \epsilon^2)^{7/2}}$$
@@ -192,7 +195,7 @@ The algorithm is described at a high level in Algorithm \ref{alg:Generation}.
 
 The generation step creates one Kelvinlet per vertex. The iterative merging step is a performance optimization, reducing the number of new Kelvinlets added each frame to a more reasonable number. Impulse Kelvinlets may be removed once they have been simulated for a sufficient length of time, as their influence has likely reached a steady state. Our tests pick merging parameters to maintain a maximum of 100 Kelvinlets at a time.
 
-When generating initial per-vertex Kelvinlets, we refer to Newton's Second Law, $F = m\ddot{x}$, to obtain a direction and magnitude for the impulse force vector. We approximate that the user-provided mass of a mesh is evenly distributed across its vertices when picking a value for $m$. We pick a level of regularization $\epsilon$ such that there is a force of exactly $F$ at the location of the vertex:
+When generating initial per-vertex Kelvinlets, we refer to Newton's Second Law, $F = m\ddot{x}$, to obtain a direction and magnitude for the impulse force vector. We approximate that the user-provided mass of a mesh is evenly distributed across its vertices when picking a value for $m$. We pick a level of regularization $\epsilon$ such that there is a force exactly equal to $F$ at the location of the vertex:
 $$\begin{aligned}
   \rho(0) &= F\\
   F \frac{15\epsilon^4}{8\pi(0^2 + \epsilon^2)^{7/2}} &= F\\
@@ -215,7 +218,45 @@ $$\begin{aligned}
 \end{aligned}$$
 
 Finally, we also need to pick a level of regularization $\epsilon'$ for the combined Kelvinlet. Ideally, it should regularize more the farther away the two force centers are, allowing the influence of the Kelvinlet to spread out and reach both. This leads us to the following formula, which augments a linear combination with a distance term:
-$$\epsilon' = \frac{\Vert F_1 \Vert \epsilon_1 + \Vert F_2 \Vert \epsilon_2 + \min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\} \Vert x_1 - x_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}$$
+\begin{equation}
+epsilon' = \frac{\Vert F_1 \Vert \epsilon_1 + \Vert F_2 \Vert \epsilon_2 + \min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\} \Vert x_1 - x_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}
+\label{eqn-regularization}
+\end{equation}
+
+Figure \ref{fig-regularize} shows how the variation in the waveforms of two input Kelvinlet forces (in red) affects the resultant combined Kelvinlet force (in blue).
+
+\begin{figure}
+\centering
+\begin{subfigure}{\linewidth}
+\centering
+\includegraphics[trim={0 0.1cm 0 0},clip, scale=0.2]{img/regularize1.png}
+\caption{}
+\label{}
+\end{subfigure}
+
+\begin{subfigure}{\linewidth}
+\centering
+\includegraphics[trim={0 0.1cm 0 0},clip, scale=0.2]{img/regularize2.png}
+\caption{}
+\label{}
+\end{subfigure}
+
+\begin{subfigure}{\linewidth}
+\centering
+\includegraphics[scale=0.2]{img/regularize3.png}
+\caption{}
+\label{}
+\end{subfigure}
+
+\begin{subfigure}{\linewidth}
+\centering
+\includegraphics[trim={0 0.1cm 0 0},clip, scale=0.2]{img/regularize4.png}
+\caption{}
+\label{}
+\end{subfigure}
+\caption{Demonstration of combining Dynamic Kelvinlets. Two Kelvinlets, shown in red are combined to form the resultant Kelvinlet, which is shown in blue. The value of regulariztion $\epsilon$ for the initial Kelvinlets is 1 here. The value of regularization for the resultant combined Kelvinlet is obtained by solving equation \ref{eqn-regularization}. Also, the location of the centre of the combined force is taken as the weighted mean of the initial forces. (a)-(d) show how the initial force waveforms affect the resultant Kelvinlet force.}
+\label{fig-regularize}
+\end{figure}
 
 \section{Results}
 
