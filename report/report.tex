@@ -136,7 +136,7 @@
 
 \section{Introduction}
 
-Physically-based animations are widely used in computer graphics due to the realism of the resulting motion and their ease of use compared to manual animation of the same level of detail. However, physically-based simulations are computationally cumbersome due to the necessity of numerical solves and the accompanying stability conditions. There is additionally a  monotonous setup phase for artists employing such techniques, usually involving the generation of an appropriate volumetric mesh for the simulation. Hence, a simpler method to simulate secondary deformations would streamline the process of generating animations.
+Physically-based animations are widely used in computer graphics due to the realism of the resulting motion and their ease of use compared to manual animation of the same level of detail. However, physically-based simulations are computationally cumbersome due to the necessity of numerical solves and the accompanying stability conditions. There is additionally a  monotonous setup phase for artists employing such techniques, usually involving the generation of an appropriate volumetric mesh for the simulation. Also, controlling the output of such a simulation is difficult. Generally, several simulations need to be run with different set of input parameters to get the desired result. Hence, a simpler method to simulate secondary deformations would streamline the process of generating animations.
 
 Our goal is to provide a system through which artists can automatically add secondary motion to a standard keyframed animation using linear blend skinning bones. In this paper, we implement such a system based upon \textit{Dynamic Kelvinlets} \cite{DynamicKelvinlets}, an extension of elastostatic regularized Kelvinlets \cite{RegularizedKelvinlets}. The paper proposing Dynamic Kelvinlets derives novel fundamental solutions of elastodynamics for spatially regularized and time-varying forces applied to an infinite continuum. This results in wave-like deformations through a medium. The method has the following prime advantages over conventional physically-based simulation methods:
 
@@ -144,6 +144,7 @@ Our goal is to provide a system through which artists can automatically add seco
   \item No geometric discretization is required
   \item The solution is closed-form, so no computationally intensive solve is required
   \item Displacement at a time $t_i$ does not depend on the previous time step $t_{i-1}$, so there are no stability conditions due to accumulated error over time
+  \item As the displacements of vertices are not correlated, they can be calculated in parallel on the GPU in real time
 \end{itemize}
 
 We implement the \textit{impulse Kelvinlet} and \textit{push Kelvinlet} responses of an object, which correspond respectively to the responses to Dirac delta function and Heaviside function force distributions over time. We use the accelerations of vertices in the input keyframes to generate Kelvinlets. We then examine how this technique can generate visually accurate secondary motion in real-time. The technique is specifically suited to scenarios involving jiggling, denting, ripples, and blasts.
@@ -152,6 +153,8 @@ We implement the \textit{impulse Kelvinlet} and \textit{push Kelvinlet} response
 
 Deformation of an infinite 3D medium formed by an isotropic and homogeneous elastic material are considered in the Dynamic Kelvinlets paper. Fundamental solutions are derived for the linear elasticity equation, where $b$ is a time-varying external body force, $m$ is the mass density, $\mu$ is the elastic shear modulus indicating the material stiffness, and $v$ is the Poisson ratio that controls the material compressibility:
 $$m\partial_{tt}u=\mu\Delta \frac{u}{1-2v}\nabla\left(\nabla\cdot u\right)+b$$
+
+This equation is also called the elastic wave equation as it resembles the wave equation. It has an additional divergence term that restricts large volume changes. The point of application of force acts as the source for the waves and they radiate in all directions towards infinity. Two kinds of waves are generated. The first is the pressure wave which represents the volume oscillation in space and time. It depends on both the Poisson ration and the elastic shear modulus. The pressure wave travels as a longitudinal wave in the medium. The second wave is the shear wave. It produces divergence free displacements in the transverse direction. This wave only depends on the shear modulus of the medium. The combined response of these two waves gives us the dynamic kelvinlet response to a force in 3D space.
 
 The regularization of the Kelvinlet force produces a density function $\rho$ based on the amount of regularization $\epsilon$ and the radius $r$ away from the force centre:
 $$\rho(r) = \frac{15\epsilon^4}{8\pi(r^2 + \epsilon^2)^{7/2}}$$
