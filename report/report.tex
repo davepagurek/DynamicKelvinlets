@@ -139,9 +139,9 @@
 
 \section{Introduction}
 
-Physically-based animations are widely used in computer graphics due to the realism of the resulting motion and their ease of use compared to manual animation of the same level of detail. However, physically-based simulations are computationally cumbersome due to the necessity of numerical solves and the accompanying stability conditions. There is additionally a  monotonous setup phase for artists employing such techniques, usually involving the generation of an appropriate volumetric mesh for the simulation. Controlling the output of such a simulation is difficult. Generally, several simulations need to be run with different sets of input parameters to get the desired result. Hence, a simpler method to simulate secondary deformations would streamline the process of generating animations.
+Physically-based animations are widely used in computer graphics due to the realism of the resulting motion and their ease of use compared to manual animation of the same level of detail. However, physically-based simulations are computationally cumbersome due to the necessity of numerical solves and the accompanying stability conditions. There is additionally a  monotonous setup phase for artists employing such techniques, usually involving the generation of an appropriate volumetric mesh for the simulation. Also, controlling the output of such a simulation is difficult. Generally, several simulations need to be run with different set of input parameters to get the desired result. Hence, a simpler method to simulate secondary deformations would streamline the process of generating animations.
 
-Our goal is to provide a system through which artists can automatically add secondary motion to standard keyframed animation using linear blend skinning bones. In this paper, we implement such a system based upon \textit{Dynamic Kelvinlets} \cite{DynamicKelvinlets}, an extension of elastostatic regularized Kelvinlets \cite{RegularizedKelvinlets}. The paper proposing Dynamic Kelvinlets derives novel fundamental solutions of elastodynamics for spatially regularized and time-varying forces applied to an infinite continuum. This results in wave-like deformations through a medium. The method has the following prime advantages over conventional physically-based simulation methods:
+Our goal is to provide a system through which artists can automatically add secondary motion to a standard keyframed animation using linear blend skinning bones. In this paper, we implement such a system based upon \textit{Dynamic Kelvinlets} \cite{DynamicKelvinlets}, an extension of elastostatic regularized Kelvinlets \cite{RegularizedKelvinlets}. The paper proposing Dynamic Kelvinlets derives novel fundamental solutions of elastodynamics for spatially regularized and time-varying forces applied to an infinite continuum. This results in wave-like deformations through a medium. The method has the following prime advantages over conventional physically-based simulation methods:
 
 \begin{itemize}
   \item No geometric discretization is required
@@ -157,7 +157,7 @@ We implement the \textit{impulse Kelvinlet} and \textit{push Kelvinlet} response
 Deformation of an infinite 3D medium formed by an isotropic and homogeneous elastic material are considered in the Dynamic Kelvinlets paper. Fundamental solutions are derived for the linear elasticity equation, where $b$ is a time-varying external body force, $m$ is the mass density, $\mu$ is the elastic shear modulus indicating the material stiffness, and $v$ is the Poisson ratio that controls the material compressibility:
 $$m\partial_{tt}u=\mu\Delta \frac{u}{1-2v}\nabla\left(\nabla\cdot u\right)+b$$
 
-This equation is also called the elastic wave equation as it resembles the wave equation. It has an additional divergence term that restricts large volume changes. The point of application of force acts as the source for the waves, from which they radiate in all directions towards infinity. Two kinds of waves are generated. The first is the pressure wave, which represents the volume oscillation in space and time. It depends on both the Poisson ratio and the elastic shear modulus. The pressure wave travels as a longitudinal wave through the medium. The second wave is the shear wave. It produces divergence-free displacements in the transverse direction. This wave only depends on the shear modulus of the medium. The combined response of these two waves gives us the material response to a regularized force in 3D space.
+This equation is also called the elastic wave equation as it resembles the wave equation. It has an additional divergence term that restricts large volume changes. The point of application of force acts as the source for the waves and they radiate in all directions towards infinity. Two kinds of waves are generated. The first is the pressure wave which represents the volume oscillation in space and time. It depends on both the Poisson ration and the elastic shear modulus. The pressure wave travels as a longitudinal wave in the medium. The second wave is the shear wave. It produces divergence free displacements in the transverse direction. This wave only depends on the shear modulus of the medium. The combined response of these two waves gives us the material response to a regularized force in 3D space.
 
 The regularization of the Kelvinlet force produces a density function $\rho$ based on the amount of regularization $\epsilon$ and the radius $r$ away from the force centre:
 $$\rho(r) = \frac{15\epsilon^4}{8\pi(r^2 + \epsilon^2)^{7/2}}$$
@@ -179,7 +179,7 @@ We chose to implement these fundamental solutions for impulse and push response 
 
 \subsection{Framework}
 
-Our implementation \cite{Github} is written in C++ using the OpenFrameworks library \cite{OpenFrameworks}, a wrapper for OpenGL that provides mesh data structures. Starting from an initial mesh, we apply an impulse or push force to it at a given location using our \texttt{DisplacedMesh} class, which is responsible for simulating and displaying the result. It implements the solution to the linear elastodynamics equation in C++ for calculation on the CPU. Since the displacement for each vertex has no dependence on the displacement of any other vertex, the calculation is also implemented as a step in the vertex shader on the GPU. In both cases, it produces offsets for the original mesh vertices given their initial locations and the elapsed time. These offsetted vertices are then passed through the rest of the OpenGL pipeline to be rendered to the screen.
+Our implementation \cite{Github} is written in C++ using the OpenFrameworks library \cite{OpenFrameworks}, a wrapper for OpenGL that provides mesh data structures. Starting from an initial mesh, we apply an impulse or push force to it at a given location using our \texttt{DisplacedMesh} class, which is responsible for simulating and displaying the result. It implements the solution to the linear elastodynamics equation in C++ for calculation on the CPU. Additionally, since the displacement for each vertex has no dependence on the displacement of any other vertex, the calculation is also implemented as a step in the vertex shader on the GPU. In both cases, it produces offsets for the original mesh vertices given their initial locations and the elapsed time. These offsetted vertices are then passed through the rest of the OpenGL pipeline to be rendered to the screen.
 
 \subsection{Automatic Secondary Motion}
 
@@ -191,7 +191,7 @@ Given the ability to simulate the response of a mesh to a Kelvinlet force, we th
   \item Iteratively merge Kelvinlets that plausibly would have resulted from a single source impulse.
 \end{itemize}
 
-These steps form the algorithm described in Algorithm \ref{alg:Generation}, which represents our system at a high level.
+The algorithm is described at a high level in Algorithm \ref{alg:Generation}.
 
 The generation step creates one Kelvinlet per vertex. The iterative merging step is a performance optimization, reducing the number of new Kelvinlets added each frame to a more reasonable number. Impulse Kelvinlets may be removed once they have been simulated for a sufficient length of time, as their influence has likely reached a steady state. Our tests pick merging parameters to maintain a maximum of 100 Kelvinlets at a time.
 
@@ -203,7 +203,7 @@ $$\begin{aligned}
   \epsilon &\approx 0.8\\
 \end{aligned}$$
 
-We then merge Kelvinlets. We only want to merge them if they are nearby and have near-parallel force vectors. To check for closeness, we compute an approximate radius of the Kelvinlet's influence, only allowing Kelvinlets to merge if there is an intersection between the spheres produced by these radii. We pick the radius at which force magnitude drops to a low value (we use 0.1):
+We then merge Kelvinlets. We only want to merge them if they are nearby and have near parallel force vectors. To check for closeness, we compute an approximate radius of the Kelvinlet's influence, only allowing Kelvinlets to merge if there is an intersection between the spheres produced by these radii. We pick the radius at which force magnitude drops to a low value (we use 0.1):
 $$\begin{aligned}
   \left\Vert F\rho(r) \right\Vert &= 0.1\\
   \frac{15 \epsilon^4 \Vert F \Vert}{8\pi \left(r^2 + \epsilon^2\right)^{7/2}} &= 0.1\\
@@ -219,7 +219,7 @@ $$\begin{aligned}
 
 Finally, we also need to pick a level of regularization $\epsilon'$ for the combined Kelvinlet. Ideally, it should regularize more the farther away the two force centers are, allowing the influence of the Kelvinlet to spread out and reach both. This leads us to the following formula, which augments a linear combination with a distance term:
 \begin{equation}
-\epsilon' = \frac{\Vert F_1 \Vert \epsilon_1 + \Vert F_2 \Vert \epsilon_2 + \min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\} \Vert x_1 - x_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}
+epsilon' = \frac{\Vert F_1 \Vert \epsilon_1 + \Vert F_2 \Vert \epsilon_2 + \min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\} \Vert x_1 - x_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}
 \label{eqn-regularization}
 \end{equation}
 
@@ -254,7 +254,7 @@ Figure \ref{fig-regularize} shows how the variation in the waveforms of two inpu
 \caption{}
 \label{}
 \end{subfigure}
-\caption{Demonstration of combining Dynamic Kelvinlets. Two Kelvinlets, whose sum is shown in red, are combined and approximated to form whe Kelvinlet in blue. The value of regulariztion $\epsilon$ for the initial Kelvinlets is 1. The value of regularization for the resultant combined Kelvinlet is obtained by solving Equation~\ref{eqn-regularization}. The location of the centre of the combined force is taken as the weighted mean of the initial forces. (a)-(d) show how the initial force waveforms affect the resultant Kelvinlet force.}
+\caption{Demonstration of combining Dynamic Kelvinlets. Two Kelvinlets, shown in red are combined to form the resultant Kelvinlet, which is shown in blue. The value of regulariztion $\epsilon$ for the initial Kelvinlets is 1 here. The value of regularization for the resultant combined Kelvinlet is obtained by solving equation \ref{eqn-regularization}. Also, the location of the centre of the combined force is taken as the weighted mean of the initial forces. Lastly, the magnitude of the combined force is takes so as to conserve the area under the regularization curve. (a)-(d) show how the initial force waveforms affect the resultant Kelvinlet force.}
 \label{fig-regularize}
 \end{figure}
 
@@ -262,7 +262,7 @@ Figure \ref{fig-regularize} shows how the variation in the waveforms of two inpu
 
 \subsection{Stability}\label{Stability}
 
-One of the benefits of Dynamic Kelvinlet based motion is that there is a closed-form solution for displacement, meaning there will not be any error accumulation or instability over time due to the integration scheme. However, within a single frame, there are still issues of stability due to numerical precision. This is largely due to the fact that some of the intermediate steps in calculating displacement include division by a factor of $r^3$. The paper includes a formula for the limit of displacement as $r \rightarrow 0$ to avoid division by 0 directly at the force application centre, but \textit{near} the centre, if one uses the limit formula, it is equivalent to treating the whole neighbourhood around the centre as a rigid body. If one does not use the limit formula, one must deal with significant loss of precision. Using double precision floats and a single fourth-order Runge-Kutta (RK4) step, the paper treats a radius of 1e-4 around the centre as a rigid body. Since our implementation runs on graphics hardware in a shader, we are limited to single precision floats. We find that with a radius of 1e-2 and four RK4 steps, there is no noticeable precision error.
+One of the benefits of Dynamic Kelvinlet based motion is that there is a closed-form solution for displacement, meaning there will not be any error accumulation or instability over time due to the integration scheme. However, within a single frame, there are still issues of stability due to numerical precision. This is largely due to the fact that some of the intermediate steps in calculating displacement include division by a factor of $r^3$. The paper includes a formula for the limit of displacement as $r \rightarrow 0$ to avoid division by 0 directly at the force application centre, but near the centre, if one uses the limit formula, it is equivalent to treating the whole neighbourhood around the centre as a rigid body. If one does not use the limit formula, one must deal with significant loss of precision. Using double precision floats and a single fourth-order Runge-Kutta (RK4) step, the paper treats a radius of 1e-4 around the centre as a rigid body. Since our implementation runs on graphics hardware in a shader, we are limited to single precision floats. We find that with a radius of 1e-2 and four RK4 steps, there is no noticeable precision error.
 
 
 \begin{figure}[h]
@@ -347,7 +347,40 @@ We used the Bullet Physics \cite{Bullet} simulator packaged with Blender 2.8 \ci
 
 Immediately after the application of an impulse, the displacement in the neighbourhood of the impulse centre deforms similarly in the two systems. As time progresses, Bullet and Dynamic Kelvinlet responses diverge significantly. The most noticeable difference is that Bullet's mass-spring model continues to oscillate long after the impulse has been applied, whereas the Dynamic Kelvinlet response has a single pressure wave and a single shear wave. Figure \ref{fig:Energy} shows the kinetic energy over time for both simulations, communicating how the Bullet simulation continues moving for longer than the Dynamic Kelvinlet simulation. Note that since spring energy internal to the Bullet simulation is inaccessible when treated as a black box, only kinetic energy is shown rather than total energy of the system.
 
-To assess the impact of the continuum assumption made by Dynamic Kelvinlets, we test on the Stanford Dragon \cite{Stanford} as a true wave would have to travel through its winding body; it would be unable to propagate directly outwards from the force centre as it would in a continuum with no gaps in space. While the continuum approximation produces inaccuracies on sharp, targeted forces, with large enough regularization of the impulse force, there is not much noticeable difference in displacement wave propagation between the continuum approximation and the mass-spring model. This is because the regularization spreads the force out enough that it has some influence across spatial gaps directly, without needing  to propagate through the volume of the mesh.
+\begin{figure*}
+\centering
+\begin{subfigure}{0.5\linewidth}
+\centering
+\caption*{\textbf{10 frames after impulse}}
+\includegraphics[scale=0.2]{img/dragonDK10.png}
+\caption*{Dynamic Kelvinlet}
+\label{}
+\end{subfigure}%
+\begin{subfigure}{0.5\linewidth}
+\centering
+\caption*{\textbf{20 frames after impulse}}
+\includegraphics[scale=0.2]{img/dragonDK20.png}
+\caption*{Dynamic Kelvinlet}
+\label{}
+\end{subfigure}
+
+\begin{subfigure}{0.5\linewidth}
+\centering
+\includegraphics[scale=0.2]{img/dragonBullet10.png}
+\caption*{Bullet Physics}
+\label{}
+\end{subfigure}%
+\begin{subfigure}{0.5\linewidth}
+\centering
+\includegraphics[scale=0.2]{img/dragonBullet20.png}
+\caption*{Bullet Physics}
+\label{}
+\end{subfigure}
+\caption{Simulation Quality comparison between Dynamic Kelvinlet and Bullet Physics for an impulse. Arrows show the amount of motion at different time delays after an impulse. Note that the Bullet simulation continues to oscillate after the Dynamic Kelvinlet simulation has reached a steady state. A video showing the comparison can be found in the implementation repository \citep{Github}.}
+\label{fig-dragon}
+\end{figure*}
+
+To assess the impact of the continuum assumption made by Dynamic Kelvinlets, we test on the Stanford Dragon \cite{Stanford} as a true wave would have to travel through its winding body rather than propagating directly outwards from the force centre as it would in a continuum with no gaps in space (see Figure \ref{fig-dragon}). While the continuum approximation produces inaccuracies on sharp, targeted forces, with large enough regularization of the impulse force, there is not much noticeable difference in displacement wave propagation between the continuum approximation and the mass-spring model. This is because the regularization spreads the force out enough that it has some influence across spatial gaps directly, without needing  to propagate through the volume of the mesh.
 
 The response of force on soft bodies is usually perceived as a wave traveling through the body. Depending on the properties of the soft body, the dynamics might change, but the wave-like motion is well known. Spring-based models tend to give an oscillatory motion about the original location, which can differ from real life soft bodies when there are insufficient damping parameters. Dynamic Kelvinlets have an advantage over spring based methods for such cases, where erring on the side of having too few oscillations is preferable. This also results in more easily controllable responses, as the influence of a single force has a tighter bound in time, which can be preferable for artists and animators.
 
@@ -357,16 +390,18 @@ A final note is that the Bullet simulation ran at around 19 frames per second on
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=0.95\linewidth]{img/frames.png}
+  \includegraphics[width=\linewidth]{img/frames.png}
   \caption{Frames from linear blend skinned animations with frames of Kelvinlet-induced deformation motion superimposed.}
   \label{fig:Frames}
 \end{figure*}
 
 \subsection{Secondary Motion Quality}
 
-To analyze the quality of the generated Kelvinlet-based secondary motion, we produced a number of models with linear blend skinned primary animation. These models and animations were passed through our system to produce real-time output. To illustrate the effect of the generated Kelvinlets on the meshes, some frames are shown in Figures \ref{fig:Jump} and \ref{fig:Frames}. The resulting animations themselves can be viewed in our implementation on Github \cite{Github}.
+To analyze the quality of the generated Kelvinlet-based secondary motion, we produced a number models with linear blend skinned primary animation. These models and animations were passed through our system to produce real time output. To illustrate the effect of the generated Kelvinlets on the meshes, some frames are shown in Figures \ref{fig:Jump} and \ref{fig:Frames}. The resulting animations themselves can be viewed in our implementation on Github \cite{Github}.
 
-It is first important to clarify what ``primary motion'' entails. By analogy to other aspects of computer graphics, secondary motion is to primary motion as texture is to geometry. In John Lasseter's paper describing the 12 Principles of Animation \cite{Lasseter}, secondary motion is ``the action of an object resulting from another action.'' Secondary motion is necessarily smaller than and subordinate to primary motion because its role in storytelling is to add depth and realism and not to take focus away from the acting, which is done by the primary motion. Lasseter states that if secondary motion ``conflicts, becomes more interesting, or dominates in any way, it is either the wrong choice or is staged improperly.'' Larger actions that are arguably still the result of another action are likely not secondary motion and instead fall into the definition of \textit{follow-through:} the termination of an action. Segments of a character that are attached to the part leading movement will ``move at a  slower speed and `drag' behind the leading part of the figure,'' continuing to move after the leading part has stopped. In our system, this is considered part of primary motion and must be manually animated in the linear blend skin keyframes.
+It is first important to clarify what ``primary motion'' entails here. By analogy to other aspects of computer graphics, secondary motion is to primary motion as texture is to geometry. In John Lasseter's paper describing the 12 Principles of Animation \cite{Lasseter}, secondary motion is ``the action of an object resulting from another action.'' Secondary motion is necessarily smaller than and subordinate to primary motion because its role in storytelling is to add depth and realism and not to take focus away from the acting, which is done by the primary motion. Lasseter states that if secondary motion ``conflicts, becomes more interesting, or dominates in any way, it is either the wrong choice or is staged improperly.'' Larger actions that are arguably still the result of another action are likely not secondary motion and instead fall into the definition of \textit{follow through:} the termination of an action. Segments of a character that are attached to the part leading movement will ``move at a  slower speed and `drag' behind the leading part of the figure,'' continuing to move after the leading part has stopped. In our system, this is considered part of primary motion and must be manually animated in the linear blend skin keyframes.
+
+
 
 As noted when discussing the Bullet physics simulation, Kelvinlets on their own do not produce oscillations. While this is a technical limitation of Kelvinlets, the addition of large-scale oscillation where none is present in the input is likely not desired by animators. The oscillation of bones in character animation typically is the result of follow through action as leading bones slow down and stop, causing following bones to overshoot and bounce back. Being part of primary motion, this is something we expect animators would want control over and would prefer to specify in the input. The secondary motion we produce instead takes the form of small waves and ripples travelling through the mesh.
 
@@ -378,7 +413,7 @@ The largest issues with our system come from the continuum assumption made by Ke
 
 Our current system assumes that the mass of a mesh is equal to the user-provided mass of the whole mesh divided evenly across its vertices. This firstly assumes that vertex density in the mesh is propoertional to mesh mass, which may not be true. Secondly, this makes the assumption that the mass of the mesh is spread across its surface, which also may not always mirror reality, where the movement on the surface is a result of the movement throughout the volume. A mechanism to allow for correction of both issues would be to specify the effective mass of a vertex as an additional vertex attribute, possibly through UV mapping. This allows mass to be easily redistributed. It does not on its own account for the volume beneath the mesh surface, but it would provide a mechanism to allow an artist to increase or decrease the effective mass at a vertex to more closely match the intended material properties.
 
-It should also be mentioned that the system does not take into account undeformed objects. A deformed object may end up clipping through other objects in a scene, if any are present. There is the potential for work that builds off of this system while attempting to address this issue in a way that does not prevent efficient implementation of the GPU.
+It should also be mentioned that the system does not take into account undeformed objects. A deformed object may end up clipping through other objects in a scene, if any are present. Future work can be done to attempt to address this issue in a way that does not prevent efficient implementation of the GPU.
 
 %%
 %% The next two lines define the bibliography style to be used, and
@@ -389,7 +424,7 @@ It should also be mentioned that the system does not take into account undeforme
 \appendix
 \section{Contributions}
 
-Dave set up the framework for the project in C++ and GLSL, implementing impulse Kelvinlets in both. He created an equivalent test case both in the Dynamic Kelvinlets project and in Blender using the Bullet physics simulator. He set up the pipeline to process animated meshes and generate Kelvinlets from them each frame. He investigated the behavior of regularized Kelvinlet forces and created formulas for approximating two Kelvinlets with a single Kelvinlet. He modeled, rigged, and animated the animated meshes used for tests in this report using Blender.
+Dave set up the framework for the project in C++ and GLSL and implemented impulse Kelvinlets in both. He created an equivalent test case both in the Dynamic Kelvinlets project and in Blender using the Bullet physics simulator. He set up the pipeline to process animated meshes and generate Kelvinlets from them each frame. He investigated the behavior of regularized Kelvinlet forces and created formulas for approximating two Kelvinlets with a single Kelvinlet. He modeled, rigged, and animated the animated meshes used for tests in this report using Blender.
 
 Jasmeet implemented push Kelvinlets in C++, generalizing both types of Kelvinlets under a common interface. He later implemented push Kelvinlets in GLSL after profiling the C++ implementation to identify whether or not there were fixable bottlenecks. He added code to export image sequences and convert them to video files. When automatically generating secondary motion, he investigated the magnitude of the forces involved with common actions and experimented with the parameters in Kelvinlet generation to find ones that work reasonably for these actions.
 
