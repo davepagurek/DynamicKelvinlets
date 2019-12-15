@@ -219,7 +219,7 @@ $$\begin{aligned}
 
 Finally, we also need to pick a level of regularization $\epsilon'$ for the combined Kelvinlet. Ideally, it should regularize more the farther away the two force centers are, allowing the influence of the Kelvinlet to spread out and reach both. This leads us to the following formula, which augments a linear combination with a distance term:
 \begin{equation}
-epsilon' = \frac{\Vert F_1 \Vert \epsilon_1 + \Vert F_2 \Vert \epsilon_2 + \min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\} \Vert x_1 - x_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}
+\epsilon' = \frac{\Vert F_1 \Vert \epsilon_1 + \Vert F_2 \Vert \epsilon_2 + \min\{\Vert F_1\Vert, \, \Vert F_2 \Vert\} \Vert x_1 - x_2 \Vert}{\Vert F_1 \Vert + \Vert F_2 \Vert}
 \label{eqn-regularization}
 \end{equation}
 
